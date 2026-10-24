@@ -223,7 +223,9 @@ jobs:
             # A push to main since record read it, such as a merged pull request, needs a rebase first.
             git push "$remote" HEAD:main || { git pull --rebase "$remote" main && git push "$remote" HEAD:main; }
           fi
-          node scripts/target.ts "$(git rev-parse HEAD)"
+      # The commit pushed above, or main as record read it when the history didn't change.
+      - name: Name the releases' target
+        run: node scripts/target.ts "$(git rev-parse HEAD)"
       # Error statistics only, with the commit the releases tag. Kept so announce can be run again from them.
       - uses: actions/upload-artifact@v7
         with:
