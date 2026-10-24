@@ -88,7 +88,14 @@ export async function readHistory(root: string, key: HistoryKey): Promise<GridPo
 
 const byGate = (a: { gate: string }, b: { gate: string }) => a.gate.localeCompare(b.gate);
 
-/** Writes one grid point, sorted so a re-run that changes nothing leaves the files byte-identical. */
+/** A grid point's two files as `writeGridPoint` writes them, sorted so a re-run that changes nothing leaves them byte-identical. */
+export function gridPointFiles(point: GridPoint): { rows: string; gates: string } {
+  const rows = [...point.rows].sort(
+    (a, b) => byGate(a, b) || a.fit_days - b.fit_days || a.offset_days - b.offset_days,
+  );
+  return { rows: toJsonl(rows), gates: toJsonl([...point.gates].sort(byGate)) };
+}
+
 export async function writeGridPoint(
   root: string,
   key: HistoryKey,
@@ -96,14 +103,9 @@ export async function writeGridPoint(
 ): Promise<void> {
   const dir = historyDir(root, key);
   await mkdir(dir, { recursive: true });
-  const rows = [...point.rows].sort(
-    (a, b) => byGate(a, b) || a.fit_days - b.fit_days || a.offset_days - b.offset_days,
-  );
-  await writeFile(join(dir, `grid-${point.fitEnd}.rows.jsonl`), toJsonl(rows));
-  await writeFile(
-    join(dir, `grid-${point.fitEnd}.gates.jsonl`),
-    toJsonl([...point.gates].sort(byGate)),
-  );
+  const files = gridPointFiles(point);
+  await writeFile(join(dir, `grid-${point.fitEnd}.rows.jsonl`), files.rows);
+  await writeFile(join(dir, `grid-${point.fitEnd}.gates.jsonl`), files.gates);
 }
 
 export async function readState(root: string, key: HistoryKey): Promise<HistoryState> {
