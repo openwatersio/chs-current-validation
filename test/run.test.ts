@@ -254,6 +254,7 @@ describe("recordTarget", () => {
       repo: "openwatersio/chs-current-validation",
     });
     const history = await readHistory(root, key);
+    expect(history.every((p) => p.rows.some((r) => r.gate === "chs-b"))).toBe(true);
     expect(
       history.every((p) =>
         p.rows.filter((r) => r.gate === "chs-b").every((r) => r.iwls === "00003"),
@@ -368,5 +369,25 @@ describe("recordTarget", () => {
         repo: "r",
       }),
     ).rejects.toThrow(/stamp 000000000000/);
+  });
+
+  test("refuses a plan whose new grid points would leave a gap in the history", async () => {
+    const { root } = await seeded();
+    const before = await snapshot(historyDir(root, key));
+    await expect(
+      recordTarget({
+        root,
+        outDir: join(root, "out2"),
+        plan: plan({ candidates: [2] }),
+        gates: GATES,
+        database: "1.0.0-beta.20261017",
+        outputs: scored([2], [60, 210]),
+        curated: new Map(),
+        tags: [SEED_TAG],
+        ships: true,
+        repo: "openwatersio/chs-current-validation",
+      }),
+    ).rejects.toThrow(/first new grid point is 2, but the history ends at grid point 0/);
+    expect(await snapshot(historyDir(root, key))).toEqual(before);
   });
 });

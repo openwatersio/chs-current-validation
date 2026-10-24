@@ -113,6 +113,11 @@ export async function recordTarget(input: {
   // Only grid points past the newest committed, so recording the same plan twice commits nothing.
   const last = history.at(-1)?.grid;
   const candidates = plan.candidates.filter((g) => last === undefined || g > last);
+  if (last !== undefined && candidates.length && candidates[0] !== last + 1) {
+    throw new Error(
+      `the plan's first new grid point is ${candidates[0]}, but the history ends at grid point ${last}`,
+    );
+  }
   const { commit, stopped } = committable(byGridPoint(outputs.rows, outputs.gates, candidates), {
     gates: new Map(input.gates.map((g) => [g.id, windowsFor(g.id)])),
     offsets: plan.offsets,

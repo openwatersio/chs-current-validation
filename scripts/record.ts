@@ -21,14 +21,17 @@ const tags = stdout.split("\n").filter(Boolean);
 const repo = process.env.GITHUB_REPOSITORY ?? "openwatersio/chs-current-validation";
 
 async function readShards(dir: string, target: TargetPlan): Promise<Outputs> {
-  const names = (await readdir(dir)).filter((n) => n.startsWith(`shard-${target.stamp}-`)).sort();
-  if (names.length !== target.shards.length) {
+  const expected = target.shards.map((s) => `shard-${target.stamp}-${s.id}`);
+  const arrived = (await readdir(dir)).filter((n) => n.startsWith(`shard-${target.stamp}-`));
+  const missing = expected.filter((n) => !arrived.includes(n));
+  const unplanned = arrived.filter((n) => !expected.includes(n));
+  if (missing.length || unplanned.length) {
     throw new Error(
-      `${target.stamp}: ${names.length} shard outputs for ${target.shards.length} shards`,
+      `${target.stamp}: missing shard outputs ${missing.join(", ") || "none"}, unplanned ${unplanned.join(", ") || "none"}`,
     );
   }
   const outputs: Outputs = { rows: [], gates: [] };
-  for (const name of names) {
+  for (const name of expected) {
     outputs.rows.push(
       ...parseJsonl<ResultRow>(await readFile(join(dir, name, "chs-current-fit.jsonl"), "utf8")),
     );
