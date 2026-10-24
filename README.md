@@ -31,7 +31,7 @@ The rules follow the gate confidence design in [openwatersio/slackwater-ios#752]
 
 ## Secrets
 
-`DATABASE_ISSUES_TOKEN` is a fine-grained token with read and write access to issues in openwatersio/slackwater-database. A run fails at its start when the token is missing or can't read that repository. That check doesn't prove the token can write issues: a token without Issues: write fails at announce, after the history is pushed. Fix the token, then re-run announce as below.
+`DATABASE_ISSUES_TOKEN` is a fine-grained token with read and write access to issues in openwatersio/slackwater-database. A run fails at its start when the token is missing or can't create issues there. The check asks to create an issue with an empty title, which GitHub refuses as invalid (HTTP 422) when the token may create issues and as unauthorized, forbidden or not found when it may not, so it never creates one. A token that stops working during the hours of scoring still fails at announce, after the history is pushed and after the release, this repository's issues and any follow-up run. Fix the token, then re-run announce as below.
 
 ## Recovering a failed announce
 
