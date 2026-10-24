@@ -36,7 +36,7 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # Before hours of scoring, so a token that can't file issues fails the run at once. An
       # issue with an empty title is invalid, so the probe creates nothing: a token that may
       # create issues gets HTTP 422, and one that may not gets 401, 403 or 404.
@@ -94,7 +94,7 @@ jobs:
         with:
           node-version-file: engine/mise.toml
       - working-directory: engine
-        run: npm ci && npm run build --workspace @slackwater/engine
+        run: npm ci --ignore-scripts && npm run build --workspace @slackwater/engine
       - name: Check the engine's stamp
         working-directory: engine
         env:
@@ -134,11 +134,13 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          # The write token stays out of .git/config while dependency code runs; the commit step pushes with it.
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: mise.toml
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@v8
         with:
           name: plan
@@ -158,6 +160,8 @@ jobs:
           name: announce
           path: out/
       - name: Commit the history
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -165,8 +169,9 @@ jobs:
           if [ -d history ]; then git add history; fi
           if git diff --cached --quiet; then echo "No history change"; exit 0; fi
           git commit --quiet -F out/commit.txt
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           # A push to main during this job, such as a merged pull request, needs a rebase first.
-          git push origin HEAD:main || { git pull --rebase origin main && git push origin HEAD:main; }
+          git push "$remote" HEAD:main || { git pull --rebase "$remote" main && git push "$remote" HEAD:main; }
       - name: Publish releases and issues
         env:
           GH_TOKEN: ${{ github.token }}
