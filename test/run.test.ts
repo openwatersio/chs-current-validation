@@ -226,6 +226,16 @@ describe("recordTarget", () => {
     expect(announcement.releases.map((r) => r.tag)).toEqual([`fit-${testFitEnd(1)}-8f85912-r1`]);
   });
 
+  test("drops the flag of a gate that is no longer among the run's gates, and says so", async () => {
+    const { root } = await seeded();
+    await writeState(root, key, { needs_backfill: ["chs-b", "chs-gone"] });
+    const announcement = await monthlyAfterSeed(root, scored([1], [60, 210]));
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    expect(announcement.summary).toContain(
+      `${STAMP}: dropped chs-gone from needs_backfill: no longer among the fitted gates`,
+    );
+  });
+
   test("flags a CHS revision after a run that recorded no canary", async () => {
     const { root } = await seeded();
     const canary = (value: string | undefined) => (gate: string) =>

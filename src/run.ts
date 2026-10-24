@@ -242,10 +242,15 @@ export async function recordTarget(input: {
     latestRecords(history),
     outputs.gates.filter((g) => !backfill.has(g.gate)),
   );
+  // A gate gone from the database is never planned again, so its flag would otherwise stay forever.
+  const planned = new Set(input.gates.map((g) => g.id));
+  const stale = state.needs_backfill.filter((id) => !planned.has(id));
   // A flagged gate stays flagged until a backfill scores both recipe windows at every grid point it covers, so its disposition never pools two stations.
   const flagged = [
     ...new Set([
-      ...state.needs_backfill.filter((id) => !backfill.has(id) || unscored.has(id)),
+      ...state.needs_backfill.filter(
+        (id) => planned.has(id) && (!backfill.has(id) || unscored.has(id)),
+      ),
       ...changes.map((c) => c.gate),
     ]),
   ].sort();
@@ -260,6 +265,9 @@ export async function recordTarget(input: {
   if (rescoredGrids.size)
     say(`re-scored ${[...replaced].join(", ")} over ${rescoredGrids.size} grid points`);
   if (stopped) say(`grid point ${stopped.grid} waits: ${stopped.reason}`);
+  if (stale.length) {
+    say(`dropped ${stale.join(", ")} from needs_backfill: no longer among the fitted gates`);
+  }
 
   // CHS's horizon moves on by itself; any other stop would hold the history back every month, unseen.
   if (stopped && !waitsForHorizon(stopped.reason)) {
