@@ -59,13 +59,23 @@ describe("checkCurated", () => {
     expect(checkCurated(curated, ["chs-active-pass", "chs-great-bras-dor"], dir)).toEqual([]);
   });
 
-  test("names each fitted gate with no station file, without throwing", async () => {
+  test("names each fitted gate with no station file, without throwing, while at most half have none", async () => {
     const dir = await stationFiles();
     const curated = await readCurated(dir);
-    expect(checkCurated(curated, ["chs-active-pass", "chs-new", "chs-other"], dir)).toEqual([
-      "chs-new",
-      "chs-other",
-    ]);
+    const gates = ["chs-active-pass", "chs-great-bras-dor", "chs-new", "chs-other"];
+    expect(checkCurated(curated, gates, dir)).toEqual(["chs-new", "chs-other"]);
+  });
+
+  test("throws when more than half the fitted gates have no station file, naming the count and a few", async () => {
+    const dir = await stationFiles();
+    const curated = await readCurated(dir);
+    expect(() => checkCurated(curated, ["chs-active-pass", "chs-new", "chs-other"], dir)).toThrow(
+      `2 of 3 fitted gates have no station file in ${dir}, such as chs-new, chs-other`,
+    );
+    const renamed = ["chs-active-pass", ...Array.from({ length: 6 }, (_, k) => `ca-gate-${k + 1}`)];
+    expect(() => checkCurated(curated, renamed, dir)).toThrow(
+      `6 of 7 fitted gates have no station file in ${dir}, such as ca-gate-1, ca-gate-2, ca-gate-3`,
+    );
   });
 
   test("throws when no station file is a CHS gate", async () => {

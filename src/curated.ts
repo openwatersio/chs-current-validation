@@ -49,9 +49,10 @@ export async function readCurated(dir: string): Promise<Map<string, CuratedGate>
 
 /**
  * The fitted gates no station file in `dir` lists, which ship nothing and get
- * no slackwater-database issue. Throws when `dir` holds no CHS station file at
- * all: a layout change in slackwater-database would otherwise make every gate
- * look like it ships online and silently stop every issue there.
+ * no slackwater-database issue. Throws when `dir` holds no CHS station file,
+ * or none for more than half the gates: a change to slackwater-database's
+ * layout or id format would otherwise make every gate look like it ships
+ * online and silently stop every issue there.
  */
 export function checkCurated(
   curated: ReadonlyMap<string, CuratedGate>,
@@ -59,7 +60,13 @@ export function checkCurated(
   dir: string,
 ): string[] {
   if (!curated.size) throw new Error(`${dir} holds no CHS station file`);
-  return gates.filter((id) => !curated.has(id));
+  const unlisted = gates.filter((id) => !curated.has(id));
+  if (unlisted.length * 2 > gates.length) {
+    throw new Error(
+      `${unlisted.length} of ${gates.length} fitted gates have no station file in ${dir}, such as ${unlisted.slice(0, 3).join(", ")}`,
+    );
+  }
+  return unlisted;
 }
 
 export function claimOf(fit: ChsFitRecord): Claim {
