@@ -149,6 +149,8 @@ export async function recordTarget(input: {
   const key = { stamp: plan.stamp, scorer: plan.scorer };
   const out: Announcement = { releases: [], issues: [], dispatch: false, summary: [] };
   const say = (line: string) => out.summary.push(`${plan.stamp}: ${line}`);
+  // Per-gate issue titles are shared by every target, so each body names its history.
+  const inHistory = `in the history for recipe stamp \`${plan.stamp.slice(0, 7)}\`, scorer ${plan.scorer}`;
 
   const stray = outputs.rows.find((r) => r.stamp !== plan.stamp || r.scorer !== plan.scorer);
   if (stray) {
@@ -292,7 +294,7 @@ export async function recordTarget(input: {
       out.issues.push({
         repo: input.repo,
         title: `No rows for ${g.gate}`,
-        body: `Grid point ${p.grid}, the fit ending ${p.fitEnd}, has no scored rows for \`${g.gate}\`: ${reason}.`,
+        body: `Grid point ${p.grid} ${inHistory}, the fit ending ${p.fitEnd}, has no scored rows for \`${g.gate}\`: ${reason}.`,
       });
     }
   }
@@ -316,7 +318,7 @@ export async function recordTarget(input: {
     out.issues.push({
       repo: input.repo,
       title: `Backfill of ${id} failed`,
-      body: `A backfill re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
+      body: `A backfill ${inHistory} re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
     });
   }
   for (const c of changes) {
@@ -326,7 +328,7 @@ export async function recordTarget(input: {
         c.kind === "revision"
           ? `CHS revised predictions at ${c.gate}`
           : `${c.gate} moved to another IWLS station or flood axis`,
-      body: `The ${c.kind === "revision" ? "canary hash" : c.kind === "station" ? "IWLS station" : "flood axis"} for \`${c.gate}\` changed from \`${c.from}\` to \`${c.to}\`. Its rows no longer pool with its history, so a follow-up run re-scores it over the newest grid points, and its disposition carries over until then.`,
+      body: `The ${c.kind === "revision" ? "canary hash" : c.kind === "station" ? "IWLS station" : "flood axis"} for \`${c.gate}\` changed from \`${c.from}\` to \`${c.to}\` ${inHistory}. Its new rows no longer pool with its earlier ones, so a follow-up run re-scores it over the newest grid points, and its disposition carries over until then.`,
     });
   }
   if (changes.length) out.dispatch = true;

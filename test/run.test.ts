@@ -69,6 +69,8 @@ function plan(overrides: Partial<TargetPlan>): TargetPlan {
 
 const key = { stamp: STAMP, scorer: 2 };
 const SEED_TAG = `fit-${testFitEnd(0)}-8f85912-r1`;
+/** How this repository's per-gate issue bodies name the history, so comments from two targets can be told apart. */
+const HISTORY = "in the history for recipe stamp `8f85912`, scorer 2";
 
 /** Every file in a directory, by name, with its contents. */
 async function snapshot(dir: string): Promise<Record<string, string>> {
@@ -213,6 +215,9 @@ describe("recordTarget", () => {
     expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
     expect(announcement.dispatch).toBe(true);
     expect(announcement.issues.map((i) => i.title)).toEqual(["CHS revised predictions at chs-b"]);
+    expect(announcement.issues[0].body).toContain(
+      `The canary hash for \`chs-b\` changed from \`6d055872a12d\` to \`000000000000\` ${HISTORY}.`,
+    );
     const doc = await readDispositions(root, key);
     expect(doc?.gates["chs-b"]).toMatchObject({
       status: "pending_backfill",
@@ -254,8 +259,11 @@ describe("recordTarget", () => {
       }),
     );
     const announcement = await monthlyAfterSeed(root, outputs);
-    expect(announcement.issues.map((i) => i.title)).toContain(
-      "chs-b moved to another IWLS station or flood axis",
+    const moved = announcement.issues.find(
+      (i) => i.title === "chs-b moved to another IWLS station or flood axis",
+    );
+    expect(moved?.body).toContain(
+      `The IWLS station for \`chs-b\` changed from \`00002\` to \`00009\` ${HISTORY}.`,
     );
     expect(announcement.dispatch).toBe(true);
     expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
@@ -295,7 +303,7 @@ describe("recordTarget", () => {
       {
         repo: "openwatersio/chs-current-validation",
         title: "No rows for chs-b",
-        body: `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 10 \`no_events\`.`,
+        body: `Grid point 1 ${HISTORY}, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 10 \`no_events\`.`,
       },
     ]);
     expect((await readHistory(root, key)).at(-1)?.grid).toBe(1);
@@ -314,7 +322,7 @@ describe("recordTarget", () => {
     outputs.rows.push(...scored([1], [210], ["chs-a"]).rows);
     const announcement = await monthlyAfterSeed(root, outputs);
     expect(announcement.issues.map((i) => i.body)).toEqual([
-      `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: refused; its 5 rows are 5 \`no_events\`.`,
+      `Grid point 1 ${HISTORY}, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: refused; its 5 rows are 5 \`no_events\`.`,
     ]);
   });
 
@@ -341,7 +349,7 @@ describe("recordTarget", () => {
       lagging((days) => (days === 60 ? NO_EVENTS : BEYOND_HORIZON)),
     );
     expect(announcement.issues.map((i) => i.body)).toEqual([
-      `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 5 \`no_events\` and 5 \`beyond_horizon\`.`,
+      `Grid point 1 ${HISTORY}, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 5 \`no_events\` and 5 \`beyond_horizon\`.`,
     ]);
   });
 
@@ -661,6 +669,7 @@ describe("recordTarget", () => {
     const issue = announcement.issues.find((i) => i.title === "Backfill of chs-b failed");
     expect(issue?.body).toContain(reason);
     expect(issue?.body).toContain("stays flagged");
+    expect(issue?.body).toContain(`A backfill ${HISTORY} re-scored \`chs-b\``);
     expect((await readDispositions(root, key))?.gates["chs-b"]).toMatchObject({
       status: "pending_backfill",
       chs_fit: { tier: "final", days: 60 },
