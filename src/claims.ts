@@ -1,8 +1,10 @@
 // A claim is what a gate ships as: its tier, window, slack bound and
 // provisional bound. This module decides which claims a year of evidence
 // supports, and applies the design's stability rule: a demotion lands from
-// the first grid point that shows it, and a promotion only once it clears its
-// boundaries by a margin on two consecutive grid points.
+// the first grid point that shows it, and a promotion only once two
+// consecutive grid points support it. Only the parts of a promotion that
+// improve must clear their boundaries by a margin; the rest need only hold.
+// A promotion never quotes a larger 60-day bound, so that quote never grows.
 import {
   BAR,
   NO_MARGIN,
