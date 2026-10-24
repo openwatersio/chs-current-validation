@@ -1,0 +1,6 @@
+node_modules/
+out/
+shards/
+engines/
+database/
+.superpowers/
