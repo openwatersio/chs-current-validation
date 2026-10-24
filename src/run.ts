@@ -210,8 +210,9 @@ export async function recordTarget(input: {
   }
 
   const newest = points[points.length - 1];
-  const tag = releaseTag(newest.fitEnd, plan.stamp, input.tags);
   const released = await readReleased(root, key);
+  // A release whose announce failed is in releases.json but not yet a git tag.
+  const tag = releaseTag(newest.fitEnd, plan.stamp, [...input.tags, ...released]);
   const previousDoc = await readDispositions(root, key);
   const pending = new Set(flagged);
   const gates: Record<string, GateDisposition> = {};

@@ -299,6 +299,33 @@ describe("recordTarget", () => {
     expect(await snapshot(historyDir(root, key))).toEqual(before);
   });
 
+  test("numbers a release after the history's own, when an earlier one never reached git", async () => {
+    const { root } = await seeded();
+    const announcement = await recordTarget({
+      root,
+      outDir: join(root, "out2"),
+      plan: plan({ backfill: ["chs-b"], backfillGrid: range(-13, 0) }),
+      gates: GATES,
+      database: "1.0.0-beta.20261017",
+      outputs: scored(
+        range(-13, 0),
+        [60, 210, 365],
+        ["chs-b"],
+        () => ({ iwls: "00003" }),
+        () => ({ iwls: "00003" }),
+      ),
+      curated: new Map(),
+      tags: [],
+      ships: true,
+      repo: "openwatersio/chs-current-validation",
+    });
+    const tag = `fit-${testFitEnd(0)}-8f85912-r2`;
+    expect(announcement.releases.map((r) => r.tag)).toEqual([tag]);
+    expect(
+      JSON.parse(await readFile(join(historyDir(root, key), "releases.json"), "utf8")),
+    ).toEqual([SEED_TAG, tag]);
+  });
+
   test("records a backfilled gate that has only a reason, and opens an issue for it", async () => {
     const { root } = await seeded();
     const reason = "no IWLS station within 3 km";
