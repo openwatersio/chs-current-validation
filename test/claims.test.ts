@@ -5,7 +5,7 @@ import {
   measuredClaim,
   provisionalFor,
   stabilize,
-  strongestSupported,
+  strongestPromotion,
   supports,
   type Claim,
 } from "../src/claims.ts";
@@ -125,9 +125,9 @@ describe("provisionalFor", () => {
   });
 });
 
-describe("strongestSupported", () => {
+describe("strongestPromotion", () => {
   test("finds the strongest claim every grid point supports with the margin", () => {
-    expect(strongestSupported([ev(33, 28), ev(31, 33)], PROMOTION_MARGIN)).toEqual({
+    expect(strongestPromotion([ev(33, 28), ev(31, 33)], { tier: "online" })).toEqual({
       tier: "bounded",
       days: 60,
       bound: 35,
@@ -180,6 +180,45 @@ describe("stabilize", () => {
     });
   });
 
+  test("demotes to online when the newest year supports no fitted claim", () => {
+    expect(
+      stabilize({ curated: { tier: "final", days: 60 }, newest: ev(50, 50), previous: good }),
+    ).toEqual({ claim: { tier: "online" }, change: "demoted" });
+  });
+
+  test("never promotes to a larger 60-day quote, and holds an unchanged quote with no margin", () => {
+    expect(
+      stabilize({
+        curated: { tier: "bounded", days: 210, bound: 40, provisional: 40 },
+        newest: ev(39.5, 33),
+        previous: ev(39.5, 33),
+      }),
+    ).toEqual({
+      claim: { tier: "bounded", days: 210, bound: 35, provisional: 40 },
+      change: "promoted",
+    });
+    expect(
+      stabilize({
+        curated: { tier: "bounded", days: 60, bound: 40 },
+        newest: ev(39.5, 33),
+        previous: ev(39.5, 33),
+      }),
+    ).toEqual({
+      claim: { tier: "bounded", days: 210, bound: 35, provisional: 40 },
+      change: "promoted",
+    });
+    expect(
+      stabilize({
+        curated: { tier: "bounded", days: 210, bound: 35, provisional: 35 },
+        newest: ev(34.5, 28),
+        previous: ev(34.5, 28),
+      }),
+    ).toEqual({
+      claim: { tier: "final", days: 210, provisional: 35 },
+      change: "promoted",
+    });
+  });
+
   test("promotes only what two consecutive grid points support with the margin", () => {
     expect(
       stabilize({
@@ -216,6 +255,12 @@ describe("stabilize", () => {
       claim: { tier: "online" },
       change: "fresh",
     });
+  });
+
+  test("curates afresh with the margin", () => {
+    expect(stabilize({ curated: undefined, newest: ev(29.5, 50), previous: ev(29.5, 50) })).toEqual(
+      { claim: { tier: "bounded", days: 60, bound: 35 }, change: "fresh" },
+    );
   });
 });
 

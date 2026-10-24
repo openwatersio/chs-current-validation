@@ -87,6 +87,11 @@ export function supports(e: Evaluation, claim: Claim, margin: Margin): boolean {
   }
   const limit = claim.tier === "final" ? BAR.finalWorstMin : claim.bound;
   if (limit === undefined || !atMost(w.worst_slack_min, limit - margin.minutes)) return false;
+  return supportsProvisional(e, claim, margin);
+}
+
+/** Whether the 60-day fit supports a 210-day claim's provisional answer, with its boundaries tightened by `margin`. A claim with no provisional answer needs none. */
+function supportsProvisional(e: Evaluation, claim: Claim, margin: Margin): boolean {
   if (claim.provisional === undefined) return true;
   if (claim.days !== 210 || !e[60]) return false;
   const p = provisionalFor(e[60], claim.bound, margin);
@@ -131,9 +136,46 @@ function candidates(): Claim[] {
   return out.sort(compareClaims);
 }
 
-/** The strongest claim every evaluation supports with `margin`; online at worst. */
-export function strongestSupported(evals: readonly Evaluation[], margin: Margin): Claim {
-  return candidates().find((c) => evals.every((e) => supports(e, c, margin))) ?? { tier: "online" };
+/** The bound a claim quotes for its 60-day fit: the claim itself for a 60-day gate, a 210-day gate's provisional answer, or none. */
+function quote60(c: Claim): number {
+  if (c.tier === "online") return Infinity;
+  if (c.days === 60) return c.tier === "final" ? BAR.finalWorstMin : (c.bound ?? Infinity);
+  return c.provisional ?? Infinity;
+}
+
+/** A claim without its provisional answer. */
+function withoutProvisional(c: Claim): Claim {
+  const { provisional: _provisional, ...main } = c;
+  return main;
+}
+
+/**
+ * Whether an evaluation supports promoting `base` to `c`, with the promotion
+ * margin applied only to the parts that improve on `base`: the main claim, if
+ * it ranks stronger than `base`'s, and the provisional answer, if it quotes a
+ * smaller 60-day bound than `base` does.
+ */
+function supportsPromotion(e: Evaluation, c: Claim, base: Claim): boolean {
+  const main = withoutProvisional(c);
+  const improvesMain = compareClaims(main, withoutProvisional(base)) < 0;
+  if (!supports(e, main, improvesMain ? PROMOTION_MARGIN : NO_MARGIN)) return false;
+  return supportsProvisional(e, c, quote60(c) < quote60(base) ? PROMOTION_MARGIN : NO_MARGIN);
+}
+
+/**
+ * The strongest claim that ranks stronger than `base`, never quotes a larger
+ * 60-day bound than `base`, and that every evaluation supports with the
+ * promotion margin on the parts that improve on `base`; `base` when none does.
+ */
+export function strongestPromotion(evals: readonly Evaluation[], base: Claim): Claim {
+  return (
+    candidates().find(
+      (c) =>
+        compareClaims(c, base) < 0 &&
+        quote60(c) <= quote60(base) &&
+        evals.every((e) => supportsPromotion(e, c, base)),
+    ) ?? base
+  );
 }
 
 /**
@@ -141,7 +183,8 @@ export function strongestSupported(evals: readonly Evaluation[], margin: Margin)
  * gate is curated afresh. A curated claim the newest year doesn't support is
  * demoted to the strongest weaker claim that year supports. A stronger claim
  * replaces it only when both the newest and previous grid points support it
- * with the promotion margin.
+ * with the promotion margin on the parts that improve, and it never quotes a
+ * larger 60-day bound, which would be a demotion.
  */
 export function stabilize(input: {
   curated: Claim | undefined;
@@ -157,8 +200,8 @@ export function stabilize(input: {
     ) ?? { tier: "online" };
     return { claim, change: "demoted" };
   }
-  const best = strongestSupported([newest, previous], PROMOTION_MARGIN);
   const base: Claim = curated ?? { tier: "online" };
+  const best = strongestPromotion([newest, previous], base);
   if (compareClaims(best, base) < 0) return { claim: best, change: curated ? "promoted" : "fresh" };
   return { claim: base, change: curated ? "kept" : "fresh" };
 }
