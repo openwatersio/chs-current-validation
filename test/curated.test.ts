@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { baselineClaim, claimOf, readCurated, shippedClaim } from "../src/curated.ts";
+import { baselineClaim, checkCurated, claimOf, readCurated, shippedClaim } from "../src/curated.ts";
 
 async function stationFiles(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "stations-"));
@@ -49,6 +49,34 @@ describe("readCurated", () => {
     const dir = await stationFiles();
     await writeFile(join(dir, "broken.yaml"), "provider: chs\nsources: [chs-broken\n");
     await expect(readCurated(dir)).rejects.toThrow(/broken\.yaml/);
+  });
+});
+
+describe("checkCurated", () => {
+  test("passes when every fitted gate has a CHS station file", async () => {
+    const dir = await stationFiles();
+    const curated = await readCurated(dir);
+    expect(() =>
+      checkCurated(curated, ["chs-active-pass", "chs-great-bras-dor"], dir),
+    ).not.toThrow();
+  });
+
+  test("throws when a fitted gate has no station file, naming each one", async () => {
+    const dir = await stationFiles();
+    const curated = await readCurated(dir);
+    expect(() => checkCurated(curated, ["chs-active-pass", "chs-new", "chs-other"], dir)).toThrow(
+      `no CHS station file in ${dir} lists chs-new, chs-other`,
+    );
+  });
+
+  test("throws when no station file is a CHS gate", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "stations-"));
+    await writeFile(join(dir, "trial-island.yaml"), "provider: noaa\nsources: [noaa/PCT1391]\n");
+    const curated = await readCurated(dir);
+    expect(() => checkCurated(curated, [], dir)).toThrow(`${dir} holds no CHS station file`);
+    expect(() => checkCurated(curated, ["chs-active-pass"], dir)).toThrow(
+      `${dir} holds no CHS station file`,
+    );
   });
 });
 

@@ -5,7 +5,7 @@ import { execFile } from "node:child_process";
 import { appendFile, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { readCurated } from "../src/curated.ts";
+import { checkCurated, readCurated } from "../src/curated.ts";
 import type { GateInput, TargetPlan } from "../src/plan.ts";
 import { parseJsonl, type GateRecord, type ResultRow } from "../src/rows.ts";
 import { recordTarget, type Announcement, type Outputs } from "../src/run.ts";
@@ -15,7 +15,13 @@ const plan = JSON.parse(await readFile("out/plan.json", "utf8")) as {
   gates: GateInput[];
   plans: TargetPlan[];
 };
-const curated = await readCurated(process.env.DATABASE_STATIONS ?? "database/stations/current/ca");
+const stationsDir = process.env.DATABASE_STATIONS ?? "database/stations/current/ca";
+const curated = await readCurated(stationsDir);
+checkCurated(
+  curated,
+  plan.gates.map((g) => g.id),
+  stationsDir,
+);
 const { stdout } = await promisify(execFile)("git", ["tag", "--list", "fit-*"]);
 const tags = stdout.split("\n").filter(Boolean);
 const repo = process.env.GITHUB_REPOSITORY ?? "openwatersio/chs-current-validation";

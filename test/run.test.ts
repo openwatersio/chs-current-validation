@@ -461,6 +461,43 @@ describe("recordTarget", () => {
     expect(issues[0].body).not.toContain("no longer holds");
   });
 
+  test("asks slackwater-database to update a gate that ships a fitted claim with no scored week behind it, but not while it waits on a backfill", async () => {
+    const root = await mkdtemp(join(tmpdir(), "run-"));
+    // chs-b's IWLS station stopped serving, so every grid point records only a reason for it.
+    const stopped = (grids: number[], windows: number[]) => {
+      const outputs = scored(grids, windows, ["chs-a"]);
+      outputs.gates.push(record({ gate: "chs-b", iwls: "00002", reason: "IWLS stopped serving" }));
+      return outputs;
+    };
+    const curated = new Map<string, CuratedGate>([
+      ["chs-b", { chs_fit: { tier: "final", days: 60, evidence: SEED_TAG } }],
+    ]);
+    const seed = await recordTarget({
+      ...seedInput(root),
+      outputs: stopped(range(-13, 0), [60, 210, 365]),
+      curated,
+    });
+    const issues = seed.issues.filter((i) => i.repo === DATABASE_REPO);
+    expect(issues.map((i) => i.title)).toEqual(["Update chs_fit for chs-b"]);
+    expect(issues[0].body).toContain(
+      "`chs-b` has no scored week to support the claim it ships: no scored week in the newest year.",
+    );
+    expect(issues[0].body).toContain("- Ships: final, 60 d");
+    expect(issues[0].body).toContain("- Release: none (insufficient)");
+
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    const pending = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out2"),
+      plan: plan({ candidates: [1] }),
+      outputs: stopped([1], [60, 210]),
+      curated,
+      tags: [SEED_TAG],
+    });
+    expect((await readDispositions(root, key))?.gates["chs-b"]?.status).toBe("pending_backfill");
+    expect(pending.issues.filter((i) => i.repo === DATABASE_REPO)).toEqual([]);
+  });
+
   test("files no slackwater-database issue when the shipped claim holds and the release's is no weaker", async () => {
     const { issues } = await freshlyCurated(
       { tier: "bounded", days: 60, slack_bound_minutes: 40 },

@@ -47,6 +47,23 @@ export async function readCurated(dir: string): Promise<Map<string, CuratedGate>
   return out;
 }
 
+/**
+ * Throws when `dir` holds no CHS station file, or none for a gate the run
+ * fitted. Either would leave the gate looking like it ships online, so a
+ * layout change in slackwater-database would silently stop its issues.
+ */
+export function checkCurated(
+  curated: ReadonlyMap<string, CuratedGate>,
+  gates: readonly string[],
+  dir: string,
+): void {
+  if (!curated.size) throw new Error(`${dir} holds no CHS station file`);
+  const missing = gates.filter((id) => !curated.has(id));
+  if (missing.length) {
+    throw new Error(`no CHS station file in ${dir} lists ${missing.join(", ")}`);
+  }
+}
+
 export function claimOf(fit: ChsFitRecord): Claim {
   return {
     tier: fit.tier,

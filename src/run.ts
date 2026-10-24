@@ -3,7 +3,7 @@
 // disposition, the release and the issues.
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { compareClaims, supports } from "./claims.ts";
+import { compareClaims, supports, type Claim } from "./claims.ts";
 import {
   byGridPoint,
   checkComplete,
@@ -108,6 +108,27 @@ function lagsHorizon(
     newest !== undefined &&
     g.horizon < newest
   );
+}
+
+/** Why slackwater-database should update what a gate ships, or undefined when the shipped claim stands. */
+function updateReason(
+  id: string,
+  d: GateDisposition,
+  shipped: Claim,
+  release: string,
+): string | undefined {
+  if (!d.chs_fit) {
+    // A gate waiting on a backfill carries its claim until the backfill lands.
+    if (d.status !== "insufficient" || shipped.tier === "online") return undefined;
+    return `In the CHS current validation release ${release}, \`${id}\` has no scored week to support the claim it ships: ${d.note}.`;
+  }
+  // A gate curated afresh can rank stronger than what it ships while the shipped claim is false.
+  const holds = !d.windows || supports(d.windows, shipped, NO_MARGIN);
+  const weaker = compareClaims(claimOf(d.chs_fit), shipped) > 0;
+  if (holds && !weaker) return undefined;
+  return holds
+    ? `The CHS current validation release ${release} gives \`${id}\` a weaker claim than the one it ships.`
+    : `In the newest year of the CHS current validation release ${release}, the claim \`${id}\` ships no longer holds.${weaker ? " The release's own claim is weaker too." : ""}`;
 }
 
 export async function recordTarget(input: {
@@ -371,22 +392,16 @@ export async function recordTarget(input: {
   say(`release ${tag}`);
 
   if (input.ships) {
+    const release = `[${tag}](https://github.com/${input.repo}/releases/tag/${tag})`;
     for (const [id, d] of Object.entries(gates)) {
-      if (!d.chs_fit) continue;
       const curatedFit = input.curated.get(id)?.chs_fit;
-      const shipped = shippedClaim(input.curated.get(id));
-      // A gate curated afresh can rank stronger than what it ships while the shipped claim is false.
-      const holds = !d.windows || supports(d.windows, shipped, NO_MARGIN);
-      const weaker = compareClaims(claimOf(d.chs_fit), shipped) > 0;
-      if (holds && !weaker) continue;
-      const release = `[${tag}](https://github.com/${input.repo}/releases/tag/${tag})`;
+      const why = updateReason(id, d, shippedClaim(input.curated.get(id)), release);
+      if (!why) continue;
       out.issues.push({
         repo: DATABASE_REPO,
         title: `Update chs_fit for ${id}`,
         body: [
-          holds
-            ? `The CHS current validation release ${release} gives \`${id}\` a weaker claim than the one it ships.`
-            : `In the newest year of the CHS current validation release ${release}, the claim \`${id}\` ships no longer holds.${weaker ? " The release's own claim is weaker too." : ""}`,
+          why,
           "",
           `- Ships: ${curatedFit ? describeFit(curatedFit) : "online, unmeasured"}`,
           `- Release: ${describeFit(d.chs_fit)} (${d.status})`,
