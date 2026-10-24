@@ -18,18 +18,28 @@ Each release is tagged `fit-<newest fit end>-<first 7 characters of the recipe s
 
 1. **Plan** reads `targets.json`, the history and the newest `@slackwater/database` release. It decides which grid points to score and which gates to backfill, and splits the gates into shards.
 2. **Score** runs the engine benchmark in `ROWS_ONLY` mode at each target's engine commit, one shard at a time and from a cold cache. Only rows and gate records leave the job.
-3. **Record** commits each new grid point once every gate has rows or a recorded reason. It derives each gate's disposition by the disposition and stability rules, writes the history, and decides what to publish.
-4. **Announce** publishes the release and opens issues. Here, for a gate with no rows, a CHS revision, or a gate that moved to another IWLS station or flood axis. In slackwater-database, for a gate whose shipped claim no longer holds, and only for the first target in `targets.json`.
+3. **Record** commits each new grid point once every gate has rows or a recorded reason. It derives each gate's disposition by the disposition and stability rules, pushes the history to `main`, and decides what to publish.
+4. **Announce** publishes the release, then opens issues here: for a gate with no scored rows at a new grid point, a grid point that can't commit for a reason other than CHS's horizon, a CHS revision, or a gate that moved to another IWLS station or flood axis. Next it dispatches a follow-up run when a gate needs a backfill. Last, for the first target in `targets.json` only, it opens issues in slackwater-database for each gate whose shipped claim no longer holds in the newest year, or whose release gives it a weaker claim.
 
 The rules follow the gate confidence design in [openwatersio/slackwater-ios#752](https://github.com/openwatersio/slackwater-ios/issues/752).
 
+## When releases pause
+
+A grid point commits only once CHS has published events through its last held-out week, which starts 270 days after its fit end. When that week falls in a year CHS hasn't published yet, the grid point waits until CHS publishes that year, and so does every grid point after it, because the history never skips one. Until then runs add no grid points, so releases pause unless a backfill re-scores a gate or a gate is flagged for one. The run's summary names the week it waits on, and the wait opens no issue. A grid point that stops for any other reason, such as IWLS refusing one window for every gate, opens a `Grid point <n> can't commit` issue here, and each run that still can't commit it comments there.
+
+## New histories
+
+Rows from different recipe stamps or scorer versions never pool, so each pair has its own history. Adding a target to `targets.json`, or moving a target to an engine commit whose benchmark has a new `SCORER_VERSION`, starts a new history. Its first run seeds 14 grid points, a year plus one, with the 365-day window, at about 7,500 IWLS requests. Every gate in a new history is curated afresh: its curated `evidence` names a release from another history, so the stability rule doesn't hold it to its curated claim. For the target the apps ship, the first release then asks slackwater-database to update each gate whose shipped claim no longer holds, or whose fresh claim is weaker.
+
 ## Layout
 
-- `targets.json` lists the recipe stamps to score, each with an `openwatersio/slackwater` commit whose engine produces it. The first is the stamp the apps ship. Adding a target seeds a history for it.
+- `targets.json` lists the recipe stamps to score, each with an `openwatersio/slackwater` commit whose engine produces it. The first is the stamp the apps ship. Adding a target starts a new history for it.
 - `history/<stamp>/scorer-<version>/` holds one rows file and one gate-record file per grid point, `state.json` with the gates waiting for a backfill, `dispositions.json` from the newest release, and `releases.json` listing the releases made from it.
 - `src/` holds the planning, commit, derivation and release logic, tested in `test/`. `scripts/` holds the workflow's steps.
 
-## Secrets
+## Repository settings
+
+`main` must accept pushes from `github-actions[bot]`. The record job pushes the history there with the workflow's `GITHUB_TOKEN`, so branch protection or a ruleset on `main` has to let that token push. Otherwise the record job fails at its push, after the scoring, and nothing is announced.
 
 `DATABASE_ISSUES_TOKEN` is a fine-grained token with read and write access to issues in openwatersio/slackwater-database. A run fails at its start when the token is missing or can't create issues there. The check asks to create an issue with an empty title, which GitHub refuses as invalid (HTTP 422) when the token may create issues and as unauthorized, forbidden or not found when it may not, so it never creates one. A token that stops working during the hours of scoring still fails at announce, after the history is pushed and after the release, this repository's issues and any follow-up run. Fix the token, then re-run announce as below.
 
