@@ -27,9 +27,14 @@ interface StationFile {
   chs_fit?: ChsFitRecord;
 }
 
-/** Reads every CHS station file in `dir`, keyed by each source id it lists, which is the gate's id in the published database. */
+/**
+ * Reads every CHS station file in `dir`, keyed by each source id it lists,
+ * which is the gate's id in the published database. Throws on an id two files
+ * list, since which `chs_fit` ships would then depend on file names.
+ */
 export async function readCurated(dir: string): Promise<Map<string, CuratedGate>> {
   const out = new Map<string, CuratedGate>();
+  const listedBy = new Map<string, string>();
   for (const name of (await readdir(dir)).filter((n) => n.endsWith(".yaml")).sort()) {
     const path = join(dir, name);
     const text = await readFile(path, "utf8");
@@ -41,6 +46,11 @@ export async function readCurated(dir: string): Promise<Map<string, CuratedGate>
     }
     if (doc?.provider !== "chs") continue;
     for (const id of doc.sources ?? []) {
+      const first = listedBy.get(id);
+      if (first) {
+        throw new Error(`${id} is listed by two CHS station files in ${dir}: ${first} and ${name}`);
+      }
+      listedBy.set(id, name);
       out.set(id, doc.chs_fit ? { chs_fit: doc.chs_fit } : {});
     }
   }

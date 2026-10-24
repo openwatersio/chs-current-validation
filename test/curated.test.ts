@@ -45,6 +45,14 @@ describe("readCurated", () => {
     expect(curated.get("chs-active-pass")?.chs_fit?.tier).toBe("bounded");
   });
 
+  test("refuses two CHS station files that list the same source id, naming both", async () => {
+    const dir = await stationFiles();
+    await writeFile(join(dir, "active-pass-2.yaml"), "provider: chs\nsources: [chs-active-pass]\n");
+    await expect(readCurated(dir)).rejects.toThrow(
+      `chs-active-pass is listed by two CHS station files in ${dir}: active-pass-2.yaml and active-pass.yaml`,
+    );
+  });
+
   test("names a station file it can't parse", async () => {
     const dir = await stationFiles();
     await writeFile(join(dir, "broken.yaml"), "provider: chs\nsources: [chs-broken\n");
