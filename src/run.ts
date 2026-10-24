@@ -194,6 +194,13 @@ export async function recordTarget(input: {
       ]);
     }
     const next = replaceGates(point, fresh, scoredHere);
+    // The run's own records can't show a clash with a gate it didn't score.
+    const sharedHere = sharedStations(next.gates);
+    if (sharedHere.length) {
+      throw new Error(
+        `grid point ${point.grid}: gates resolved to the same IWLS station: ${sharedHere.join(", ")}`,
+      );
+    }
     // Count only changed points, so the same backfill recorded twice changes nothing.
     if (!sameFiles(next, point)) rescoredGrids.add(point.grid);
     return next;

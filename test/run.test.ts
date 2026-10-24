@@ -667,6 +667,22 @@ describe("recordTarget", () => {
     ]);
   });
 
+  test("refuses a backfill that gives a gate the IWLS station another gate holds in the history", async () => {
+    const { root } = await seeded();
+    const before = await snapshot(historyDir(root, key));
+    const onA = () => ({ iwls: iwlsOf("chs-a") });
+    await expect(
+      recordTarget({
+        ...seedInput(root),
+        outDir: join(root, "out2"),
+        plan: plan({ backfill: ["chs-b"], backfillGrid: range(-13, 0) }),
+        outputs: scored(range(-13, 0), [60, 210, 365], ["chs-b"], onA, onA),
+        tags: [SEED_TAG],
+      }),
+    ).rejects.toThrow(/grid point -13: gates resolved to the same IWLS station: chs-a, chs-b/);
+    expect(await snapshot(historyDir(root, key))).toEqual(before);
+  });
+
   test("refuses rows from another stamp", async () => {
     const root = await mkdtemp(join(tmpdir(), "run-"));
     const outputs = scored([0], [60, 210]);
