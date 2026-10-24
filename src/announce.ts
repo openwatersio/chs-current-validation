@@ -1,7 +1,9 @@
-// Publishes what a recorded run decided: its releases, its issues here and in
-// slackwater-database, and a follow-up run when a gate needs a backfill. Safe
-// to run again from the same announcement, because a release that already
-// exists is skipped and the rest is filed again.
+// Publishes what a recorded run decided: its releases, its issues here, a
+// follow-up run when a gate needs a backfill, and then its issues in
+// slackwater-database, last because only they need a second token, so a
+// failing one loses nothing else. Safe to run again from the same
+// announcement, because a release that already exists is skipped and the rest
+// is filed again.
 import { fileIssues, type Gh } from "./github.ts";
 import { DATABASE_REPO, type Announcement } from "./run.ts";
 
@@ -30,7 +32,7 @@ export async function announce(
     results,
     a.issues.filter((i) => i.repo === repo),
   );
+  if (a.dispatch) await results.dispatch(repo, "results.yml");
   const forDatabase = a.issues.filter((i) => i.repo === DATABASE_REPO);
   if (forDatabase.length) await fileIssues(input.database(), forDatabase);
-  if (a.dispatch) await results.dispatch(repo, "results.yml");
 }

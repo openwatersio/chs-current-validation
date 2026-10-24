@@ -62,11 +62,27 @@ describe("announce", () => {
       `results release ${REPO} ${NEW} at abc123`,
       `results list ${REPO}`,
       `results create ${REPO} CHS revised predictions at chs-b`,
+      `results dispatch ${REPO} results.yml`,
       `database list ${DATABASE_REPO}`,
       `database create ${DATABASE_REPO} Update chs_fit for chs-a`,
-      `results dispatch ${REPO} results.yml`,
     ]);
     expect(log).toContain(`${PUBLISHED} already exists, so it is skipped`);
+  });
+
+  test("dispatches the follow-up before a slackwater-database token failure", async () => {
+    const calls: string[] = [];
+    await expect(
+      announce(announcement, {
+        repo: REPO,
+        target: "abc123",
+        results: fakeGh("results", calls),
+        database: () => {
+          throw new Error("DATABASE_ISSUES_TOKEN is not set");
+        },
+        log: () => {},
+      }),
+    ).rejects.toThrow("DATABASE_ISSUES_TOKEN is not set");
+    expect(calls).toContain(`results dispatch ${REPO} results.yml`);
   });
 
   test("needs no slackwater-database client when no issue is for it", async () => {

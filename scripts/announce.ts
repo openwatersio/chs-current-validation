@@ -1,6 +1,6 @@
-// Publishes what record.ts decided, after the history is pushed: releases and
-// this repository's issues with GH_TOKEN, slackwater-database issues with
-// DATABASE_ISSUES_TOKEN, and a follow-up run when a gate needs a backfill.
+// Publishes what record.ts decided, after the history is pushed: releases,
+// this repository's issues and a follow-up run when a gate needs a backfill
+// with GH_TOKEN, then slackwater-database issues with DATABASE_ISSUES_TOKEN.
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
