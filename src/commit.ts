@@ -74,6 +74,15 @@ export function checkComplete(point: ScoredPoint, expected: Expectation): void {
   }
 }
 
+/** The newest end of CHS's published events among a grid point's gate records. */
+export function newestHorizon(records: readonly GateRecord[]): string | undefined {
+  return records
+    .map((g) => g.horizon)
+    .filter((h): h is string => h !== undefined)
+    .sort()
+    .at(-1);
+}
+
 const HORIZON_WAIT = "CHS has not published events through";
 
 /**
@@ -83,11 +92,7 @@ const HORIZON_WAIT = "CHS has not published events through";
  * 365-day window is report-only, so its failures never hold a grid point back.
  */
 export function notScorable(point: ScoredPoint, expected: Expectation): string | null {
-  const newest = point.gates
-    .map((g) => g.horizon)
-    .filter((h): h is string => h !== undefined)
-    .sort()
-    .at(-1);
+  const newest = newestHorizon(point.gates);
   // A gate whose own horizon lags the rest records its weeks as beyond the
   // horizon, and that is its reason; the grid point waits only for CHS to
   // publish through the newest horizon.

@@ -114,6 +114,7 @@ const UNSCORED = {
   extrema: undefined,
   wrong_sign: undefined,
 };
+const NO_EVENTS = { status: "no_events" as const, ...UNSCORED };
 const BEYOND_HORIZON = { status: "beyond_horizon" as const, ...UNSCORED };
 
 /**
@@ -237,6 +238,66 @@ describe("recordTarget", () => {
     });
     expect(announcement.issues.map((i) => i.title)).toContain("No rows for chs-b");
     expect((await readHistory(root, key)).at(-1)?.grid).toBe(1);
+  });
+
+  test("opens an issue for a gate with rows but no scored week at a new grid point", async () => {
+    const { root } = await seeded();
+    const outputs = scored([1], [60, 210], undefined, (gate) =>
+      gate === "chs-b" ? NO_EVENTS : {},
+    );
+    const announcement = await monthlyAfterSeed(root, outputs);
+    expect(announcement.issues).toEqual([
+      {
+        repo: "openwatersio/chs-current-validation",
+        title: "No rows for chs-b",
+        body: `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 10 \`no_events\`.`,
+      },
+    ]);
+    expect((await readHistory(root, key)).at(-1)?.grid).toBe(1);
+  });
+
+  test("names a gate's failures and row statuses when it has no scored week at a new grid point", async () => {
+    const { root } = await seeded();
+    const outputs = scored(
+      [1],
+      [60],
+      undefined,
+      (gate) => (gate === "chs-b" ? NO_EVENTS : {}),
+      (gate) =>
+        gate === "chs-b" ? { failures: [{ grid: 1, fit_days: 210, reason: "refused" }] } : {},
+    );
+    outputs.rows.push(...scored([1], [210], ["chs-a"]).rows);
+    const announcement = await monthlyAfterSeed(root, outputs);
+    expect(announcement.issues.map((i) => i.body)).toEqual([
+      `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: refused; its 5 rows are 5 \`no_events\`.`,
+    ]);
+  });
+
+  test("opens no issue for a gate whose own horizon lags at a new grid point, unless some row has no events", async () => {
+    const lagging = (tweak: (days: number) => Partial<ResultRow>) =>
+      scored(
+        [1],
+        [60, 210],
+        undefined,
+        (gate, _grid, days) => (gate === "chs-b" ? tweak(days) : {}),
+        (gate) => (gate === "chs-b" ? { horizon: "2027-06-01T00:00:00Z" } : {}),
+      );
+    const quiet = await seeded();
+    const waiting = await monthlyAfterSeed(
+      quiet.root,
+      lagging(() => BEYOND_HORIZON),
+    );
+    expect(waiting.issues).toEqual([]);
+    expect((await readHistory(quiet.root, key)).at(-1)?.grid).toBe(1);
+
+    const mixed = await seeded();
+    const announcement = await monthlyAfterSeed(
+      mixed.root,
+      lagging((days) => (days === 60 ? NO_EVENTS : BEYOND_HORIZON)),
+    );
+    expect(announcement.issues.map((i) => i.body)).toEqual([
+      `Grid point 1, the fit ending ${testFitEnd(1)}, has no scored rows for \`chs-b\`: its 10 rows are 5 \`no_events\` and 5 \`beyond_horizon\`.`,
+    ]);
   });
 
   test("opens an issue here when a grid point can't commit for a reason other than CHS's horizon", async () => {

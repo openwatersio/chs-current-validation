@@ -9,6 +9,7 @@ import {
   checkComplete,
   committable,
   latestRecords,
+  newestHorizon,
   replaceGates,
   sharedStations,
   stationChanges,
@@ -76,6 +77,31 @@ function sameFiles(a: GridPoint, b: GridPoint): boolean {
 
 const noRowsReason = (g: GateRecord) =>
   g.reason ?? (g.failures ?? []).map((f) => f.reason).join("; ");
+
+/** A gate's rows at one grid point, none of them scored, counted by status. */
+function statusReason(rows: readonly ResultRow[]): string {
+  const counts = new Map<string, number>();
+  for (const r of rows) counts.set(r.status, (counts.get(r.status) ?? 0) + 1);
+  const parts = [...counts].map(([status, n]) => `${n} \`${status}\``);
+  return `its ${rows.length} rows are ${parts.join(" and ")}`;
+}
+
+/** Whether a gate has no scored week at a grid point only because its own horizon lags the newest, which is its recorded reason and which a later year fixes. */
+function lagsHorizon(
+  g: GateRecord,
+  rows: readonly ResultRow[],
+  newest: string | undefined,
+): boolean {
+  return (
+    rows.length > 0 &&
+    rows.every((r) => r.status === "beyond_horizon") &&
+    !g.reason &&
+    !g.failures?.length &&
+    g.horizon !== undefined &&
+    newest !== undefined &&
+    g.horizon < newest
+  );
+}
 
 export async function recordTarget(input: {
   root: string;
@@ -190,12 +216,18 @@ export async function recordTarget(input: {
   }
 
   for (const p of added) {
+    const newest = newestHorizon(p.gates);
     for (const g of p.gates) {
-      if (p.rows.some((r) => r.gate === g.gate)) continue;
+      const rows = p.rows.filter((r) => r.gate === g.gate);
+      if (rows.some((r) => r.status === "scored")) continue;
+      if (lagsHorizon(g, rows, newest)) continue;
+      const reason = [noRowsReason(g), rows.length ? statusReason(rows) : ""]
+        .filter(Boolean)
+        .join("; ");
       out.issues.push({
         repo: input.repo,
         title: `No rows for ${g.gate}`,
-        body: `Grid point ${p.grid}, the fit ending ${p.fitEnd}, has no rows for \`${g.gate}\`: ${noRowsReason(g)}.`,
+        body: `Grid point ${p.grid}, the fit ending ${p.fitEnd}, has no scored rows for \`${g.gate}\`: ${reason}.`,
       });
     }
   }
