@@ -9,17 +9,17 @@ A gate's model is fitted on the device from Canadian Hydrographic Service (CHS) 
 Each release is tagged `fit-<newest fit end>-<first 7 characters of the recipe stamp>-r<run>` and carries:
 
 - `dispositions.json`: each gate's `chs_fit` (tier, window, slack bound and provisional bound), what the newest year alone measures, and that year's evidence per window and quarter;
-- `history.csv`: one line per scored week in the history;
-- `audit.csv`: each gate's five largest slack errors, with the grid point, held-out age and slack index that reproduce each one with the engine's `FIT_END`.
+- `history.csv`: one line per committed row in the history, including weeks with no events or beyond the horizon;
+- `audit.csv`: each gate's five largest slack errors per window over the pooled year, with the grid point, held-out age and slack index that reproduce each one with the engine's `FIT_END`.
 
 ## How a run works
 
-`.github/workflows/results.yml` runs monthly, and on demand with an optional list of gates to re-score:
+`.github/workflows/results.yml` runs on `main` only, monthly and on demand with an optional list of gates to re-score:
 
 1. **Plan** reads `targets.json`, the history and the newest `@slackwater/database` release. It decides which grid points to score and which gates to backfill, and splits the gates into shards.
 2. **Score** runs the engine benchmark in `ROWS_ONLY` mode at each target's engine commit, one shard at a time and from a cold cache. Only rows and gate records leave the job.
 3. **Record** commits each new grid point once every gate has rows or a recorded reason. It derives each gate's disposition by the disposition and stability rules, writes the history, and decides what to publish.
-4. **Announce** publishes the release and opens issues: here for a gate with no rows or a CHS revision, and in slackwater-database for a gate whose shipped claim no longer holds.
+4. **Announce** publishes the release and opens issues. Here, for a gate with no rows, a CHS revision, or a gate that moved to another IWLS station or flood axis. In slackwater-database, for a gate whose shipped claim no longer holds, and only for the first target in `targets.json`.
 
 The rules follow the gate confidence design in [openwatersio/slackwater-ios#752](https://github.com/openwatersio/slackwater-ios/issues/752).
 
@@ -31,11 +31,11 @@ The rules follow the gate confidence design in [openwatersio/slackwater-ios#752]
 
 ## Secrets
 
-`DATABASE_ISSUES_TOKEN` is a fine-grained token with read and write access to issues in openwatersio/slackwater-database. A run fails at its start when the token is missing or refused.
+`DATABASE_ISSUES_TOKEN` is a fine-grained token with read and write access to issues in openwatersio/slackwater-database. A run fails at its start when the token is missing or can't read that repository. That check doesn't prove the token can write issues: a token without Issues: write fails at announce, after the history is pushed. Fix the token, then re-run announce as below.
 
 ## Recovering a failed announce
 
-The record job uploads `out/` as the `announce` artifact before it pushes. If publishing fails after the push, download that artifact into `out/` in a checkout of `main`, then run `npm ci && npm run announce` with `GH_TOKEN` and `DATABASE_ISSUES_TOKEN` set.
+The record job uploads `out/` as the `announce` artifact before it pushes. If publishing fails after the push, download that artifact into `out/` in a checkout of `main`, then run `npm ci && npm run announce` with `GH_TOKEN` and `DATABASE_ISSUES_TOKEN` set. Re-running announce from the artifact is safe: it skips a release that already exists and files the rest, so an issue it already opened gets a comment. Re-running the job or the workflow is not the recovery: the history is already on `main`, so record finds nothing new and announces nothing.
 
 ## Licence and data
 
