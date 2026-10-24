@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { checkCurated, readCurated } from "../src/curated.ts";
 import type { GateInput, TargetPlan } from "../src/plan.ts";
-import { parseJsonl, type GateRecord, type ResultRow } from "../src/rows.ts";
+import { declaredOnly, parseJsonl, suspectFields } from "../src/rows.ts";
 import { recordTarget, type Announcement, type Outputs } from "../src/run.ts";
 
 const plan = JSON.parse(await readFile("out/plan.json", "utf8")) as {
@@ -26,7 +26,10 @@ const { stdout } = await promisify(execFile)("git", ["tag", "--list", "fit-*"]);
 const tags = stdout.split("\n").filter(Boolean);
 const repo = process.env.GITHUB_REPOSITORY ?? "openwatersio/chs-current-validation";
 
-async function readShards(dir: string, target: TargetPlan): Promise<Outputs> {
+async function readShards(
+  dir: string,
+  target: TargetPlan,
+): Promise<Outputs & { dropped: string[] }> {
   const expected = target.shards.map((s) => `shard-${target.stamp}-${s.id}`);
   const arrived = (await readdir(dir)).filter((n) => n.startsWith(`shard-${target.stamp}-`));
   const missing = expected.filter((n) => !arrived.includes(n));
@@ -36,16 +39,17 @@ async function readShards(dir: string, target: TargetPlan): Promise<Outputs> {
       `${target.stamp}: missing shard outputs ${missing.join(", ") || "none"}, unplanned ${unplanned.join(", ") || "none"}`,
     );
   }
-  const outputs: Outputs = { rows: [], gates: [] };
+  const rows: object[] = [];
+  const gates: object[] = [];
   for (const name of expected) {
-    outputs.rows.push(
-      ...parseJsonl<ResultRow>(await readFile(join(dir, name, "chs-current-fit.jsonl"), "utf8")),
+    rows.push(
+      ...parseJsonl<object>(await readFile(join(dir, name, "chs-current-fit.jsonl"), "utf8")),
     );
-    outputs.gates.push(
-      ...parseJsonl<GateRecord>(await readFile(join(dir, name, "chs-current-gates.jsonl"), "utf8")),
+    gates.push(
+      ...parseJsonl<object>(await readFile(join(dir, name, "chs-current-gates.jsonl"), "utf8")),
     );
   }
-  return outputs;
+  return declaredOnly(rows, gates);
 }
 
 const all: Announcement = { releases: [], issues: [], dispatch: false, summary: [] };
@@ -54,13 +58,20 @@ for (const [k, target] of plan.plans.entries()) {
     all.summary.push(`${target.stamp}: nothing to score`);
     continue;
   }
+  const { dropped, ...outputs } = await readShards("shards", target);
+  const suspect = suspectFields(dropped);
+  if (suspect.length) {
+    all.summary.push(
+      `${target.stamp}: dropped fields the history doesn't declare, which may hold CHS times or samples: ${suspect.join(", ")}`,
+    );
+  }
   const a = await recordTarget({
     root: process.cwd(),
     outDir: "out/releases",
     plan: target,
     gates: plan.gates,
     database: plan.database,
-    outputs: await readShards("shards", target),
+    outputs,
     curated,
     tags,
     ships: k === 0,

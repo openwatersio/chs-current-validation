@@ -50,6 +50,88 @@ export interface GateRecord {
   failures?: GateFailure[];
 }
 
+// Typed as records so a field added to or removed from an interface fails the typecheck until it is listed here.
+const ROW_FIELDS: Record<keyof ResultRow, true> = {
+  gate: true,
+  iwls: true,
+  flood: true,
+  stamp: true,
+  scorer: true,
+  grid: true,
+  fit_end: true,
+  fit_days: true,
+  fit_start: true,
+  fit_samples: true,
+  fit_rms_kn: true,
+  offset_days: true,
+  week_start: true,
+  status: true,
+  slack_errors: true,
+  invented: true,
+  extremum_errors: true,
+  speed_errors: true,
+  extrema: true,
+  wrong_sign: true,
+};
+const RECORD_FIELDS: Record<keyof GateRecord, true> = {
+  gate: true,
+  iwls: true,
+  flood: true,
+  ebb: true,
+  time_zone: true,
+  horizon: true,
+  canary: true,
+  reason: true,
+  failures: true,
+};
+const FAILURE_FIELDS: Record<keyof GateFailure, true> = {
+  grid: true,
+  fit_days: true,
+  reason: true,
+};
+
+/** `item` with only the keys in `fields`, in its own order; each other key's name goes into `dropped`. */
+function keep<T>(item: object, fields: object, dropped: Set<string>, prefix: string): T {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(item)) {
+    if (Object.hasOwn(fields, key)) out[key] = value;
+    else dropped.add(`${prefix}.${key}`);
+  }
+  return out as T;
+}
+
+/**
+ * A run's rows and gate records with only the fields declared here, so
+ * nothing else the engine emits, such as CHS times or samples, reaches the
+ * history. `dropped` names each other field once, as `rows.<key>`,
+ * `gates.<key>` or `gates.failures.<key>`.
+ */
+export function declaredOnly(
+  rows: readonly object[],
+  gates: readonly object[],
+): { rows: ResultRow[]; gates: GateRecord[]; dropped: string[] } {
+  const dropped = new Set<string>();
+  return {
+    rows: rows.map((r) => keep<ResultRow>(r, ROW_FIELDS, dropped, "rows")),
+    gates: gates.map((g) => {
+      const record = keep<GateRecord>(g, RECORD_FIELDS, dropped, "gates");
+      if (!record.failures) return record;
+      const failures = record.failures.map((f) =>
+        keep<GateFailure>(f, FAILURE_FIELDS, dropped, "gates.failures"),
+      );
+      return { ...record, failures };
+    }),
+    dropped: [...dropped].sort(),
+  };
+}
+
+/** The dropped fields whose names suggest CHS times or samples, which the history must never hold. */
+export function suspectFields(dropped: readonly string[]): string[] {
+  return dropped.filter((field) =>
+    /time|date|sample|event/i.test(field.slice(field.lastIndexOf(".") + 1)),
+  );
+}
+
 export function parseJsonl<T>(text: string): T[] {
   return text
     .split("\n")
