@@ -319,7 +319,8 @@ export async function recordTarget(input: {
       });
     }
   }
-  // A backfilled gate missing a recipe window at a committed grid point, such as a new gate with no IWLS station nearby.
+  // A backfilled gate missing a recipe window at a grid point, such as a new gate with no IWLS station nearby.
+  const backfillFailedShipping = new Set<string>();
   for (const [id, missed] of unscored) {
     const newest = missed[missed.length - 1];
     const { record } = newest;
@@ -336,10 +337,28 @@ export async function recordTarget(input: {
       ? " It stays flagged for a backfill, so its disposition carries over and the next run tries again."
       : "";
     const windows = newest.windows.map((days) => `${days}-day`).join(" or ");
+    const fitEnds = missed.map((m) => m.fitEnd).join(", ");
     out.issues.push({
       repo: input.repo,
       title: `Backfill of ${id} failed`,
-      body: `A backfill ${inHistory} re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}. At grid points already committed, the history keeps what it had for it.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
+      body: `A backfill ${inHistory} re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${fitEnds}. At grid points already committed, the history keeps what it had for it.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
+    });
+    // A flagged gate's disposition carries its old claim with no evidence to test, so nothing else would question what it ships.
+    const curatedFit = input.curated.get(id)?.chs_fit;
+    if (!input.ships || !flagged.includes(id) || !curatedFit || curatedFit.tier === "online") {
+      continue;
+    }
+    backfillFailedShipping.add(id);
+    out.issues.push({
+      repo: DATABASE_REPO,
+      title: `Update chs_fit for ${id}`,
+      body: [
+        `The \`chs_fit\` that \`${id}\` ships rests on rows from before its IWLS station, flood axis or CHS's predictions changed. A backfill ${inHistory} couldn't score it after the change, at the fits ending ${fitEnds}. At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}. Until a backfill scores it, the CHS current validation can't check that claim, and its releases carry over the one from before the change.`,
+        "",
+        `- Ships: ${describeFit(curatedFit)}`,
+        "",
+        `The backfill is tracked in ${input.repo}'s \`Backfill of ${id} failed\` issue.`,
+      ].join("\n"),
     });
   }
   for (const c of changes) {
@@ -430,6 +449,7 @@ export async function recordTarget(input: {
   if (input.ships) {
     const release = `[${tag}](https://github.com/${input.repo}/releases/tag/${tag})`;
     for (const [id, d] of Object.entries(gates)) {
+      if (backfillFailedShipping.has(id)) continue;
       const curatedFit = input.curated.get(id)?.chs_fit;
       const why = updateReason(id, d, shippedClaim(input.curated.get(id)), release);
       if (!why) continue;

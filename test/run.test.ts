@@ -8,7 +8,7 @@ import { range, type GateInput, type TargetPlan } from "../src/plan.ts";
 import { readDispositions } from "../src/release.ts";
 import type { GateRecord, ResultRow } from "../src/rows.ts";
 import { DATABASE_REPO } from "../src/github.ts";
-import { recordTarget, type Outputs } from "../src/run.ts";
+import { recordTarget, type Announcement, type Outputs } from "../src/run.ts";
 import { STAMP, record, row, testFitEnd } from "./builders.ts";
 
 const DAY = 86_400_000;
@@ -515,6 +515,62 @@ describe("recordTarget", () => {
     });
     expect((await readDispositions(root, key))?.gates["chs-b"]?.status).toBe("pending_backfill");
     expect(pending.issues.filter((i) => i.repo === DATABASE_REPO)).toEqual([]);
+  });
+
+  test("asks slackwater-database to update a flagged gate that ships a fitted claim when its backfill fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "run-"));
+    // The seed measures chs-b bounded, which its later releases carry while it is flagged.
+    await recordTarget({
+      ...seedInput(root),
+      outputs: scored(range(-13, 0), [60, 210, 365], undefined, (gate) =>
+        gate === "chs-b" ? { slack_errors: [5, 5, 5, 40] } : {},
+      ),
+    });
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    const curated = new Map<string, CuratedGate>([
+      ["chs-b", { chs_fit: { tier: "final", days: 60, evidence: SEED_TAG } }],
+    ]);
+    const reason = "IWLS has no flood axis for 00003";
+    const failed = record({ gate: "chs-b", iwls: "00003", reason });
+    const database = (a: Announcement) => a.issues.filter((i) => i.repo === DATABASE_REPO);
+
+    // With a release: one issue, not also the release's "weaker claim" one for the carried bounded claim.
+    const monthly = scored([1], [60, 210], ["chs-a"]);
+    const withRelease = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out2"),
+      plan: plan({ candidates: [1], backfill: ["chs-b"], backfillGrid: range(-13, 1) }),
+      outputs: { rows: monthly.rows, gates: [...monthly.gates, failed] },
+      curated,
+      tags: [SEED_TAG],
+    });
+    expect(withRelease.releases).toHaveLength(1);
+    const issues = database(withRelease);
+    expect(issues.map((i) => i.title)).toEqual(["Update chs_fit for chs-b"]);
+    expect(issues[0].body).toContain(
+      "The `chs_fit` that `chs-b` ships rests on rows from before its IWLS station, flood axis or CHS's predictions changed.",
+    );
+    expect(issues[0].body).toContain(`A backfill ${HISTORY} couldn't score it after the change`);
+    expect(issues[0].body).toContain(reason);
+    expect(issues[0].body).toContain("- Ships: final, 60 d");
+    expect(issues[0].body).not.toContain("weaker");
+
+    // Without a release, too.
+    const backfillOnly = {
+      ...seedInput(root),
+      outDir: join(root, "out3"),
+      plan: plan({ backfill: ["chs-b"], backfillGrid: range(-13, 1) }),
+      outputs: { rows: [], gates: [failed] },
+      curated,
+      tags: [SEED_TAG, ...withRelease.releases.map((r) => r.tag)],
+    };
+    const quiet = await recordTarget(backfillOnly);
+    expect(quiet.releases).toEqual([]);
+    expect(database(quiet).map((i) => i.title)).toEqual(["Update chs_fit for chs-b"]);
+
+    // Not for a gate that ships online, nor for a target the apps don't ship.
+    expect(database(await recordTarget({ ...backfillOnly, curated: new Map() }))).toEqual([]);
+    expect(database(await recordTarget({ ...backfillOnly, ships: false }))).toEqual([]);
   });
 
   test("records and disposes a gate with no station file, which ships nothing and files no slackwater-database issue", async () => {
