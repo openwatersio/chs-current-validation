@@ -6,7 +6,7 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { readHistory, readState } from "../src/history.ts";
-import { fittedGates, planTarget, type Target } from "../src/plan.ts";
+import { fittedGates, planTarget, requestedBackfill, type Target } from "../src/plan.ts";
 
 const root = process.cwd();
 const targets = JSON.parse(await readFile("targets.json", "utf8")) as Target[];
@@ -18,16 +18,17 @@ const database = (
     version: string;
   }
 ).version;
-let gates = fittedGates(stations);
+const fitted = fittedGates(stations);
 // An empty list, as after a rename of the source name or kind, would plan a run that looks up to date.
-if (!gates.length) {
+if (!fitted.length) {
   throw new Error(`@slackwater/database ${database} has no fitted CHS current gates`);
 }
+const requested = requestedBackfill(process.env.BACKFILL ?? "", fitted);
+let gates = fitted;
 if (process.env.ONLY_GATES) {
   const only = new Set(process.env.ONLY_GATES.split(","));
   gates = gates.filter((g) => only.has(g.id));
 }
-const requested = process.env.BACKFILL?.trim() ?? "";
 const today = process.env.TODAY ?? new Date().toISOString().slice(0, 10);
 
 const plans = [];
@@ -46,16 +47,7 @@ for (const target of targets) {
       committed: history.map((p) => p.grid),
       known: new Set(history.at(-1)?.gates.map((g) => g.gate) ?? []),
       gates,
-      backfill:
-        requested === "all"
-          ? "all"
-          : [
-              ...state.needs_backfill,
-              ...requested
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean),
-            ],
+      backfill: requested === "all" ? "all" : [...state.needs_backfill, ...requested],
       today,
       grid,
     }),

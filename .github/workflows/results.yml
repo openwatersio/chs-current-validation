@@ -53,7 +53,8 @@ jobs:
           fi
       - name: Install the newest @slackwater/database
         run: |
-          version=$(npm view @slackwater/database versions --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).at(-1)))')
+          # npm prints a single published version as a string, and several as an array.
+          version=$(npm view @slackwater/database versions --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log([JSON.parse(s)].flat().at(-1)))')
           npm install --no-save "@slackwater/database@$version"
       - name: Check out each target's engine benchmarks
         run: |

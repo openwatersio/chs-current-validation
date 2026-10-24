@@ -43,9 +43,12 @@ export interface TargetPlan {
 
 /** A seed scores a year of fit ends plus one, so the stability rule has two consecutive grid points from the start. */
 export const SEED_GRID_POINTS = 14;
-/** About six gates make a seed shard of roughly 1.3 hours at the engine's pace, well inside a 6-hour job. */
+/**
+ * Six gates make a seed shard of roughly 1.3 hours at the engine's pace, well
+ * inside a 6-hour job. More gates mean more shards, never bigger ones: shards
+ * run one at a time, so their count doesn't change IWLS's load.
+ */
 export const GATES_PER_SHARD = 6;
-export const MAX_SHARDS = 4;
 /** The windows a seed or a backfill scores: the recipe's, and the report-only 365 days. */
 export const FULL_WINDOWS: readonly number[] = [60, 210, 365];
 /** The windows a monthly run scores. */
@@ -55,10 +58,10 @@ export function range(a: number, b: number): number[] {
   return a > b ? [] : Array.from({ length: b - a + 1 }, (_, k) => a + k);
 }
 
-/** Splits gates, in id order, round robin into GATES_PER_SHARD-sized shards, at most MAX_SHARDS of them. */
+/** Splits gates, in id order, round robin into the fewest shards of at most GATES_PER_SHARD. */
 export function shardGates(gates: readonly GateInput[]): GateInput[][] {
   const sorted = [...gates].sort((a, b) => a.id.localeCompare(b.id));
-  const count = Math.min(MAX_SHARDS, Math.ceil(sorted.length / GATES_PER_SHARD));
+  const count = Math.ceil(sorted.length / GATES_PER_SHARD);
   const shards: GateInput[][] = Array.from({ length: count }, () => []);
   sorted.forEach((gate, k) => shards[k % count].push(gate));
   return shards;
@@ -84,6 +87,23 @@ export function fittedGates(stations: readonly DatabaseStation[]): GateInput[] {
     )
     .map((s) => ({ id: s.id, latitude: s.latitude, longitude: s.longitude }))
     .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** The gates a dispatch's `backfill` input names, or "all". Throws on a misspelt id, which planTarget would drop without a word. */
+export function requestedBackfill(input: string, fitted: readonly GateInput[]): string[] | "all" {
+  if (input.trim() === "all") return "all";
+  const ids = input
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const known = new Set(fitted.map((g) => g.id));
+  const unknown = ids.filter((id) => !known.has(id));
+  if (unknown.length) {
+    throw new Error(
+      `the backfill input names ${unknown.join(", ")}, which aren't fitted CHS current gates`,
+    );
+  }
+  return ids;
 }
 
 export function planTarget(input: {

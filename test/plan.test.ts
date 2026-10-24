@@ -5,6 +5,7 @@ import {
   MONTHLY_WINDOWS,
   planTarget,
   range,
+  requestedBackfill,
   shardGates,
   type GateInput,
 } from "../src/plan.ts";
@@ -128,6 +129,23 @@ describe("planTarget", () => {
   });
 });
 
+describe("requestedBackfill", () => {
+  test("reads no gates, a list of gate ids, or every gate", () => {
+    expect(requestedBackfill("", gates(3))).toEqual([]);
+    expect(requestedBackfill(" all ", gates(3))).toBe("all");
+    expect(requestedBackfill("chs-gate-01, chs-gate-02,", gates(3))).toEqual([
+      "chs-gate-01",
+      "chs-gate-02",
+    ]);
+  });
+
+  test("throws on an id that isn't a fitted gate, naming each", () => {
+    expect(() => requestedBackfill("chs-gate-01,chs-gate-1, chs-gaet-02", gates(3))).toThrow(
+      "the backfill input names chs-gate-1, chs-gaet-02, which aren't fitted CHS current gates",
+    );
+  });
+});
+
 describe("windows", () => {
   test("a monthly run scores the recipe's windows and a seed or backfill adds the report-only year", () => {
     expect(MONTHLY_WINDOWS).toEqual([60, 210]);
@@ -136,10 +154,12 @@ describe("windows", () => {
 });
 
 describe("shardGates and fittedGates", () => {
-  test("splits gates into the fewest shards of about six, at most four", () => {
+  test("splits gates into the fewest shards of at most six, however many gates there are", () => {
     expect(shardGates(gates(1)).map((s) => s.length)).toEqual([1]);
     expect(shardGates(gates(7)).map((s) => s.length)).toEqual([4, 3]);
-    expect(shardGates(gates(30)).map((s) => s.length)).toEqual([8, 8, 7, 7]);
+    expect(shardGates(gates(23)).map((s) => s.length)).toEqual([6, 6, 6, 5]);
+    expect(shardGates(gates(30)).map((s) => s.length)).toEqual([6, 6, 6, 6, 6]);
+    expect(shardGates(gates(31)).map((s) => s.length)).toEqual([6, 5, 5, 5, 5, 5]);
   });
 
   test("fits every CHS current gate except those whose slack derives from a tide port", () => {
