@@ -9,6 +9,7 @@ export interface Gh {
   openIssues(repo: string): Promise<{ number: number; title: string }[]>;
   createIssue(repo: string, title: string, body: string): Promise<void>;
   comment(repo: string, number: number, body: string): Promise<void>;
+  releaseExists(repo: string, tag: string): Promise<boolean>;
   createRelease(
     repo: string,
     tag: string,
@@ -24,6 +25,12 @@ export interface IssueRequest {
   repo: string;
   title: string;
   body: string;
+}
+
+/** The HTTP status in the first line of `gh api --include` output, or undefined when there is none. */
+export function httpStatus(output: string | undefined): number | undefined {
+  const status = /^HTTP\/[\d.]+ (\d{3})/.exec(output ?? "");
+  return status ? Number(status[1]) : undefined;
 }
 
 export function ghCli(token: string): Gh {
@@ -55,6 +62,16 @@ export function ghCli(token: string): Gh {
     },
     async comment(repo, number, body) {
       await gh(["issue", "comment", String(number), "--repo", repo, "--body", body]);
+    },
+    async releaseExists(repo, tag) {
+      try {
+        await gh(["api", "--include", `repos/${repo}/releases/tags/${encodeURIComponent(tag)}`]);
+        return true;
+      } catch (error) {
+        // gh exits 1 on any HTTP error, so only the status line tells a missing release from a failure.
+        if (httpStatus((error as { stdout?: string }).stdout) === 404) return false;
+        throw error;
+      }
     },
     async createRelease(repo, tag, target, title, notesFile, files) {
       await gh([

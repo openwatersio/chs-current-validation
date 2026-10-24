@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { fileIssues, type Gh } from "../src/github.ts";
+import { fileIssues, httpStatus, type Gh } from "../src/github.ts";
 
 function fakeGh(open: { number: number; title: string }[]) {
   const calls: string[] = [];
@@ -14,11 +14,28 @@ function fakeGh(open: { number: number; title: string }[]) {
     comment: async (repo, number) => {
       calls.push(`comment ${repo} #${number}`);
     },
+    releaseExists: async () => false,
     createRelease: async () => {},
     dispatch: async () => {},
   };
   return { gh, calls };
 }
+
+describe("httpStatus", () => {
+  test("reads the status from gh api --include output", () => {
+    expect(
+      httpStatus(
+        'HTTP/2.0 404 Not Found\r\nContent-Type: application/json\r\n\r\n{"message":"Not Found"}',
+      ),
+    ).toBe(404);
+    expect(httpStatus("HTTP/1.1 200 OK\r\n")).toBe(200);
+  });
+
+  test("is undefined when gh never reached the API", () => {
+    expect(httpStatus("")).toBeUndefined();
+    expect(httpStatus(undefined)).toBeUndefined();
+  });
+});
 
 describe("fileIssues", () => {
   test("opens an issue, or comments on the open one with the same title", async () => {
