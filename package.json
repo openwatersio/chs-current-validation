@@ -1,0 +1,25 @@
+{
+  "name": "chs-current-validation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxlint && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc",
+    "plan": "node scripts/plan.ts",
+    "record": "node scripts/record.ts",
+    "announce": "node scripts/announce.ts",
+    "derive": "node scripts/derive.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "oxlint": "^1.88.0",
+    "prettier": "3.9.10",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}
