@@ -23,6 +23,7 @@ const fitted = fittedGates(stations);
 if (!fitted.length) {
   throw new Error(`@slackwater/database ${database} has no fitted CHS current gates`);
 }
+// Checked against every fitted gate, before ONLY_GATES narrows them, so ONLY_GATES can't hide a misspelt id.
 const requested = requestedBackfill(process.env.BACKFILL ?? "", fitted);
 let gates = fitted;
 if (process.env.ONLY_GATES) {

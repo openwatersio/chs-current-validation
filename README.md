@@ -12,6 +12,8 @@ Each release is tagged `fit-<newest fit end>-<first 7 characters of the recipe s
 - `history.csv`: one line per committed row in the history, including weeks with no events or beyond the horizon;
 - `audit.csv`: each gate's five largest slack errors per window over the pooled year, with the grid point, held-out age and slack index that reproduce each one with the engine's `FIT_END`.
 
+The 365-day window is report-only, and only seeds and backfills score it, so its evidence can cover fewer grid points than the recipe windows', or none.
+
 An online gate's `miss` carries `near_bar: true` when the gate passes the bar in its newest and previous years but not yet by the promotion margin (1 minute on a timing clause, 0.05 kn on peak speed), so its value passes the bar.
 
 ## How a run works
@@ -21,9 +23,9 @@ An online gate's `miss` carries `near_bar: true` when the gate passes the bar in
 1. **Plan** reads `targets.json`, the history and the newest `@slackwater/database` release. It decides which grid points to score and which gates to backfill, and splits the gates into shards.
 2. **Score** runs the engine benchmark in `ROWS_ONLY` mode at each target's engine commit, one shard at a time and from a cold cache. Only rows and gate records leave the job.
 3. **Record** commits each new grid point once every gate has rows or a recorded reason. It derives each gate's disposition by the disposition and stability rules, pushes the history to `main`, and decides what to publish.
-4. **Announce** publishes the release, then opens issues here: for a gate with no scored rows at a new grid point, a grid point that can't commit for a reason other than CHS's horizon, a CHS revision, a gate that moved to another IWLS station or flood axis, or a backfill that scored no week for a gate at some committed grid point (`Backfill of <gate> failed`). Next it dispatches a follow-up run when a gate needs a backfill. Last, for the first target in `targets.json` only, it opens issues in slackwater-database for each gate whose shipped claim no longer holds in the newest year, whose release gives it a weaker claim, or that ships a fitted claim with no scored week left to support it, an `insufficient` disposition.
+4. **Announce** publishes the release, then opens issues here: for a gate with no scored rows at a new grid point, a grid point that can't commit for a reason other than CHS's horizon, a CHS revision, a gate that moved to another IWLS station or flood axis, or a backfill that didn't score both recipe windows for a gate at some committed grid point (`Backfill of <gate> failed`). Each of these per-gate issues names its history in the body, so reports from two targets can be told apart. Next it dispatches a follow-up run when a gate needs a backfill. Last, for the first target in `targets.json` only, it opens issues in slackwater-database for each gate whose shipped claim no longer holds in the newest year, whose release gives it a weaker claim, or that ships a fitted claim with no scored week left to support it, an `insufficient` disposition.
 
-A backfill replaces a gate's rows only at the grid points where it scored a week. Elsewhere the history keeps what it had, so a backfill that fails, say during an IWLS outage, loses nothing. A gate flagged for a backfill stays flagged until one scores it at every grid point, and until then its disposition carries over and each run tries again.
+A backfill re-scores a gate over the newest 14 committed grid points and any new ones, which are all its dispositions read. Older committed grid points keep the gate's earlier rows, such as those from its previous IWLS station, and every release's `history.csv` still publishes them. Within the backfill, the gate's rows at a grid point are replaced only where it scored a week in both recipe windows, 60 and 210 days. Elsewhere the history keeps its committed rows, so a backfill that fails, say during an IWLS outage, loses none of the evidence its dispositions use, though a grid point it does replace can lose its report-only 365-day rows. A flagged gate stays flagged until a backfill scores both recipe windows at every grid point it covers, and until then its disposition carries over and each run tries again.
 
 GitHub keeps at most one pending run behind the one in progress, and a newer run replaces it. A `backfill` dispatched while a run is in progress can therefore be replaced by that run's follow-up or by the schedule, which backfill only the gates `state.json` flags. Dispatch it again once nothing is running or queued.
 
@@ -32,6 +34,13 @@ The rules follow the gate confidence design in [openwatersio/slackwater-ios#752]
 ## When releases pause
 
 A grid point commits only once CHS has published events through its last held-out week, which starts 270 days after its fit end. When that week falls in a year CHS hasn't published yet, the grid point waits until CHS publishes that year, and so does every grid point after it, because the history never skips one. Until then runs add no grid points, so releases pause unless a backfill re-scores a gate or a gate is flagged for one. The run's summary names the week it waits on, and the wait opens no issue. A grid point that stops for any other reason, such as IWLS refusing one window for every gate, opens a `Grid point <n> can't commit for <stamp> scorer <version>` issue here, naming the history that stopped because grid indices repeat across histories, and each run that still can't commit it comments there.
+
+## When record fails
+
+Some problems stop the record step and fail the run, after the scoring, with nothing committed, released or filed for any target. The failed run is the signal:
+
+- Two gates resolve to the same IWLS station, so one of them sits at the wrong position. Every run fails until slackwater-database moves one of them.
+- slackwater-database's station files list no CHS gate, or none for more than half the planned gates, which means their layout or id format changed. Below that threshold, a gate with no station file on `main` is scored and released as usual, ships nothing, and gets a warning line in the run summary.
 
 ## New histories
 
@@ -42,6 +51,7 @@ Rows from different recipe stamps or scorer versions never pool, so each pair ha
 - `targets.json` lists the recipe stamps to score, each with an `openwatersio/slackwater` commit whose engine produces it. The first is the stamp the apps ship. Adding a target starts a new history for it.
 - `history/<stamp>/scorer-<version>/` holds one rows file and one gate-record file per grid point, `state.json` with the gates waiting for a backfill, `dispositions.json` from the newest release, and `releases.json` listing the releases made from it.
 - `src/` holds the planning, commit, derivation and release logic, tested in `test/`. `scripts/` holds the workflow's steps.
+- `scripts/plan.ts` also reads two knobs for trying a plan locally, which the workflow never sets: `ONLY_GATES`, a comma-separated list of the gate ids to plan alone, and `TODAY`, the `YYYY-MM-DD` date to plan as of. `BACKFILL` ids are checked against every fitted gate whatever `ONLY_GATES` lists.
 
 ## Repository settings
 
