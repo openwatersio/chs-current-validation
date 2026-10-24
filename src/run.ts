@@ -83,6 +83,25 @@ interface Unscored {
   rows: ResultRow[];
 }
 
+/** A backfilled gate at a grid point where some recipe window scored no week, or undefined when both did. The 365-day window is report-only, so it never counts. */
+function unscoredAt(
+  point: { fitEnd: string; rows: readonly ResultRow[]; gates: readonly GateRecord[] },
+  gate: string,
+): Unscored | undefined {
+  const windows: number[] = RECIPE_WINDOWS.filter(
+    (days) =>
+      !point.rows.some((r) => r.gate === gate && r.fit_days === days && r.status === "scored"),
+  );
+  if (!windows.length) return undefined;
+  return {
+    fitEnd: point.fitEnd,
+    windows,
+    // checkComplete has made sure every backfilled gate has a record at each grid point.
+    record: point.gates.find((g) => g.gate === gate)!,
+    rows: point.rows.filter((r) => r.gate === gate && windows.includes(r.fit_days)),
+  };
+}
+
 const noRowsReason = (g: GateRecord) =>
   g.reason ?? (g.failures ?? []).map((f) => f.reason).join("; ");
 
@@ -203,26 +222,13 @@ export async function recordTarget(input: {
     checkComplete(fresh, owedBackfill);
     const scoredHere = new Set<string>();
     for (const id of backfill) {
-      // The 365-day window is report-only, so its failure never holds back a replace.
-      const windows: number[] = RECIPE_WINDOWS.filter(
-        (days) =>
-          !fresh.rows.some((r) => r.gate === id && r.fit_days === days && r.status === "scored"),
-      );
-      if (!windows.length) {
+      const miss = unscoredAt({ ...fresh, fitEnd: point.fitEnd }, id);
+      if (miss) {
+        unscored.set(id, [...(unscored.get(id) ?? []), miss]);
+      } else {
         scoredHere.add(id);
         replaced.add(id);
-        continue;
       }
-      unscored.set(id, [
-        ...(unscored.get(id) ?? []),
-        {
-          fitEnd: point.fitEnd,
-          windows,
-          // checkComplete has made sure every backfilled gate has a record here.
-          record: fresh.gates.find((g) => g.gate === id)!,
-          rows: fresh.rows.filter((r) => r.gate === id && windows.includes(r.fit_days)),
-        },
-      ]);
     }
     const next = replaceGates(point, fresh, scoredHere);
     // The run's own records can't show a clash with a gate it didn't score.
@@ -236,6 +242,13 @@ export async function recordTarget(input: {
     if (!sameFiles(next, point)) rescoredGrids.add(point.grid);
     return next;
   });
+  // A new grid point commits a backfilled gate's rows whatever they hold, so a missed window there keeps the gate flagged too.
+  for (const p of added) {
+    for (const id of backfill) {
+      const miss = unscoredAt(p, id);
+      if (miss) unscored.set(id, [...(unscored.get(id) ?? []), miss]);
+    }
+  }
 
   // What changed under the gates scored as usual since their last record.
   const changes = stationChanges(
@@ -326,7 +339,7 @@ export async function recordTarget(input: {
     out.issues.push({
       repo: input.repo,
       title: `Backfill of ${id} failed`,
-      body: `A backfill ${inHistory} re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
+      body: `A backfill ${inHistory} re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}. At grid points already committed, the history keeps what it had for it.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
     });
   }
   for (const c of changes) {

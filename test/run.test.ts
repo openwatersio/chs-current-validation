@@ -756,6 +756,35 @@ describe("recordTarget", () => {
     expect(announcement.issues[0].body).not.toContain(testFitEnd(-1));
   });
 
+  test("keeps a flagged gate's flag when its backfill misses a recipe window at a new grid point", async () => {
+    const { root } = await seeded();
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    // chs-b's backfill scores every committed grid point on its new station, but IWLS refused its 210-day fit at the new grid point 1.
+    const refused = "IWLS refused the 210-day fit";
+    const outputs = scored(
+      range(-13, 1),
+      [60, 210, 365],
+      ["chs-b"],
+      () => ({ iwls: "00003" }),
+      () => ({ iwls: "00003", failures: [{ grid: 1, fit_days: 210, reason: refused }] }),
+    );
+    outputs.rows = outputs.rows.filter((r) => !(r.grid === 1 && r.fit_days === 210));
+    const monthly = scored([1], [60, 210], ["chs-a"]);
+    outputs.rows.push(...monthly.rows);
+    outputs.gates.push(...monthly.gates);
+    const announcement = await monthlyAfterSeed(root, outputs, {
+      backfill: ["chs-b"],
+      backfillGrid: range(-13, 1),
+    });
+    expect((await readHistory(root, key)).map((p) => p.grid)).toEqual(range(-13, 1));
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    expect(announcement.issues.map((i) => i.title)).toEqual(["Backfill of chs-b failed"]);
+    expect(announcement.issues[0].body).toContain(
+      `At the fit ending ${testFitEnd(1)}, it scored no 210-day week: ${refused}.`,
+    );
+    expect((await readDispositions(root, key))?.gates["chs-b"]?.status).toBe("pending_backfill");
+  });
+
   test("leaves the history byte-identical and readable when a backfill of every gate scores nothing", async () => {
     const { root } = await seeded();
     const before = await snapshot(historyDir(root, key));
