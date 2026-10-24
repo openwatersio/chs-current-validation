@@ -53,20 +53,19 @@ describe("readCurated", () => {
 });
 
 describe("checkCurated", () => {
-  test("passes when every fitted gate has a CHS station file", async () => {
+  test("names no gate when every fitted gate has a CHS station file", async () => {
     const dir = await stationFiles();
     const curated = await readCurated(dir);
-    expect(() =>
-      checkCurated(curated, ["chs-active-pass", "chs-great-bras-dor"], dir),
-    ).not.toThrow();
+    expect(checkCurated(curated, ["chs-active-pass", "chs-great-bras-dor"], dir)).toEqual([]);
   });
 
-  test("throws when a fitted gate has no station file, naming each one", async () => {
+  test("names each fitted gate with no station file, without throwing", async () => {
     const dir = await stationFiles();
     const curated = await readCurated(dir);
-    expect(() => checkCurated(curated, ["chs-active-pass", "chs-new", "chs-other"], dir)).toThrow(
-      `no CHS station file in ${dir} lists chs-new, chs-other`,
-    );
+    expect(checkCurated(curated, ["chs-active-pass", "chs-new", "chs-other"], dir)).toEqual([
+      "chs-new",
+      "chs-other",
+    ]);
   });
 
   test("throws when no station file is a CHS gate", async () => {

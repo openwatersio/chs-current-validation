@@ -17,7 +17,7 @@ const plan = JSON.parse(await readFile("out/plan.json", "utf8")) as {
 };
 const stationsDir = process.env.DATABASE_STATIONS ?? "database/stations/current/ca";
 const curated = await readCurated(stationsDir);
-checkCurated(
+const unlisted = checkCurated(
   curated,
   plan.gates.map((g) => g.id),
   stationsDir,
@@ -53,6 +53,8 @@ async function readShards(
 }
 
 const all: Announcement = { releases: [], issues: [], dispatch: false, summary: [] };
+// A gate published before its station file reaches main is scored as usual, and ships nothing until it does.
+for (const id of unlisted) all.summary.push(`${id}: no station file on slackwater-database main`);
 for (const [k, target] of plan.plans.entries()) {
   if (!target.shards.length) {
     all.summary.push(`${target.stamp}: nothing to score`);

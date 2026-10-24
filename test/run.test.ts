@@ -498,6 +498,24 @@ describe("recordTarget", () => {
     expect(pending.issues.filter((i) => i.repo === DATABASE_REPO)).toEqual([]);
   });
 
+  test("records and disposes a gate with no station file, which ships nothing and files no slackwater-database issue", async () => {
+    const root = await mkdtemp(join(tmpdir(), "run-"));
+    // chs-a measures a bounded claim; chs-b has no scored week; neither has a station file.
+    const outputs = scored(range(-13, 0), [60, 210, 365], ["chs-a"], () => ({
+      slack_errors: [5, 5, 5, 40],
+    }));
+    outputs.gates.push(record({ gate: "chs-b", iwls: "00002", reason: "IWLS stopped serving" }));
+    const announcement = await recordTarget({
+      ...seedInput(root),
+      outputs,
+      curated: new Map([["chs-other", { chs_fit: { tier: "final", days: 60 } }]]),
+    });
+    expect(announcement.issues.filter((i) => i.repo === DATABASE_REPO)).toEqual([]);
+    const doc = await readDispositions(root, key);
+    expect(doc?.gates["chs-a"]).toMatchObject({ chs_fit: { tier: "bounded" } });
+    expect(doc?.gates["chs-b"]?.status).toBe("insufficient");
+  });
+
   test("files no slackwater-database issue when the shipped claim holds and the release's is no weaker", async () => {
     const { issues } = await freshlyCurated(
       { tier: "bounded", days: 60, slack_bound_minutes: 40 },
