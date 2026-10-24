@@ -150,7 +150,9 @@ export function auditCsv(points: readonly GridPoint[], gates: readonly string[])
 export function describeFit(fit: ChsFit | undefined): string {
   if (!fit) return "none";
   if (fit.tier === "online") {
-    return fit.miss ? `online (${fit.miss.clause} ${fit.miss.value ?? "unmeasured"})` : "online";
+    if (!fit.miss) return "online";
+    const near = fit.miss.near_bar ? ", near the bar" : "";
+    return `online (${fit.miss.clause} ${fit.miss.value ?? "unmeasured"}${near})`;
   }
   const parts = [
     fit.tier === "bounded" ? `bounded ${fit.slack_bound_minutes} min` : "final",

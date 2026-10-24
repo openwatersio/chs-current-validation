@@ -12,6 +12,8 @@ Each release is tagged `fit-<newest fit end>-<first 7 characters of the recipe s
 - `history.csv`: one line per committed row in the history, including weeks with no events or beyond the horizon;
 - `audit.csv`: each gate's five largest slack errors per window over the pooled year, with the grid point, held-out age and slack index that reproduce each one with the engine's `FIT_END`.
 
+An online gate's `miss` carries `near_bar: true` when the gate passes the bar in its newest and previous years but not yet by the promotion margin (1 minute on a timing clause, 0.05 kn on peak speed), so its value passes the bar.
+
 ## How a run works
 
 `.github/workflows/results.yml` runs on `main` only, monthly and on demand with an optional list of gates to re-score:

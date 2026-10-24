@@ -288,4 +288,47 @@ describe("chsFit", () => {
       miss: { clause: "slack_worst", value: 50 },
     });
   });
+
+  test("leaves near_bar off a miss that fails the bar outright", () => {
+    for (const [newest, previous] of [
+      [ev(50, 50), ev(50, 50)],
+      [ev(50, 20), ev(50, 50)],
+      // The newest year's outright miss comes before the previous year's near miss.
+      [ev(50, 50), ev(50, 44.5)],
+    ]) {
+      const { miss } = chsFit({ tier: "online" }, newest, previous);
+      expect(Object.keys(miss ?? {})).toEqual(["clause", "value"]);
+    }
+  });
+
+  test("flags a gate that passes both years but not by the promotion margin as near the bar", () => {
+    expect(chsFit({ tier: "online" }, ev(50, 44.5), ev(50, 44.5))).toEqual({
+      tier: "online",
+      miss: { clause: "slack_worst", value: 44.5, near_bar: true },
+    });
+    // The previous year is the one that clears the bar by less than the margin.
+    expect(chsFit({ tier: "online" }, ev(50, 20), ev(50, 44.5))).toEqual({
+      tier: "online",
+      miss: { clause: "slack_worst", value: 44.5, near_bar: true },
+    });
+  });
+
+  test("measures a near-bar miss in whichever clause the margin tightens", () => {
+    // The third quarter's medians sit inside the bar and outside the bar less a margin.
+    const thirdQuarter = (overrides: Partial<ResultRow>): Evaluation => ({
+      ...good,
+      210: evaluateWindow(
+        210,
+        year({ fit_days: 210 }, { 6: overrides, 7: overrides, 8: overrides }),
+      ),
+    });
+    expect(chsFit({ tier: "online" }, thirdQuarter({ slack_errors: [14.5, 14.5] }), good)).toEqual({
+      tier: "online",
+      miss: { clause: "slack_median", value: 14.5, near_bar: true },
+    });
+    expect(chsFit({ tier: "online" }, thirdQuarter({ speed_errors: [0.47] }), good)).toEqual({
+      tier: "online",
+      miss: { clause: "peak_speed", value: 0.47, near_bar: true },
+    });
+  });
 });

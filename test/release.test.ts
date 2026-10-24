@@ -94,6 +94,18 @@ describe("describeFit and releaseNotes", () => {
     expect(describeFit(undefined)).toBe("none");
   });
 
+  test("says when an online gate passes the bar but not by the promotion margin", () => {
+    expect(
+      describeFit({
+        tier: "online",
+        miss: { clause: "slack_worst", value: 44.5, near_bar: true },
+      }),
+    ).toBe("online (slack_worst 44.5, near the bar)");
+    expect(
+      describeFit({ tier: "online", miss: { clause: "peak_speed", value: null, near_bar: true } }),
+    ).toBe("online (peak_speed unmeasured, near the bar)");
+  });
+
   test("names the recipe and lists every gate", () => {
     const doc: DispositionsDocument = {
       release: "fit-2026-10-29-8f85912-r1",

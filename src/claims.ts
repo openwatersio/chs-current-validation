@@ -40,7 +40,8 @@ export interface ChsFit {
   days?: number;
   slack_bound_minutes?: number;
   provisional_slack_minutes?: number;
-  miss?: Miss;
+  /** An online claim's miss. `near_bar` marks one the gate passes: the promotion margin alone holds the gate online. */
+  miss?: Miss & { near_bar?: true };
 }
 
 export type Change = "fresh" | "kept" | "promoted" | "demoted";
@@ -210,18 +211,18 @@ export function stabilize(input: {
 
 /**
  * The `chs_fit` a claim ships as. An online claim carries the 210-day window's
- * miss: the newest grid point's, else the previous one's, else the clause one
- * of them fails by the promotion margin, which is why the gate stays online.
+ * miss: the newest grid point's, else the previous one's. When both years pass
+ * the bar, it is instead the clause one of them fails by the promotion margin,
+ * which is why the gate stays online, and it carries `near_bar: true` with the
+ * value that passes. A miss that fails the bar has no `near_bar` key.
  */
 export function chsFit(claim: Claim, newest: Evaluation, previous: Evaluation): ChsFit {
   if (claim.tier === "online") {
-    const miss =
-      missOf(newest[210]) ??
-      missOf(previous[210]) ??
-      missOf(newest[210], PROMOTION_MARGIN) ??
-      missOf(previous[210], PROMOTION_MARGIN);
-    if (!miss) throw new Error("an online claim whose 210-day window fails no clause");
-    return { tier: "online", miss };
+    const failing = missOf(newest[210]) ?? missOf(previous[210]);
+    if (failing) return { tier: "online", miss: failing };
+    const near = missOf(newest[210], PROMOTION_MARGIN) ?? missOf(previous[210], PROMOTION_MARGIN);
+    if (!near) throw new Error("an online claim whose 210-day window fails no clause");
+    return { tier: "online", miss: { ...near, near_bar: true } };
   }
   return {
     tier: claim.tier,
