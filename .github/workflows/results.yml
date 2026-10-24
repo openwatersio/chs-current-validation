@@ -1,0 +1,239 @@
+name: Results
+on:
+  schedule:
+    # Monthly. Grid points are 7 to 35 days apart, and each run scores every
+    # one since the newest committed.
+    - cron: "37 7 3 * *"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: Gate ids to re-score over the newest grid points, comma-separated, or "all"
+        required: false
+        default: ""
+
+concurrency:
+  # Per ref, so a run on another branch, which token skips, can't displace a pending follow-up on main.
+  group: results-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+# No job that holds a write token installs or runs package code: plan, score
+# and record run it with read-only tokens, and publish, which holds them,
+# runs only git, gh and this repository's own scripts with node.
+jobs:
+  token:
+    # Publish pushes to main, so a run from another branch would put that branch's commits there.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      # Before hours of scoring, so a token that can't file issues fails the run at once. An
+      # issue with an empty title is invalid, so the probe creates nothing: a token that may
+      # create issues gets HTTP 422, and one that may not gets 401, 403 or 404.
+      - name: Check the slackwater-database issue token
+        env:
+          GH_TOKEN: ${{ secrets.DATABASE_ISSUES_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::DATABASE_ISSUES_TOKEN is not set"; exit 1; fi
+          # gh exits 1 on any HTTP error, so only the status line of --include tells them apart.
+          status=$({ gh api --include -X POST repos/openwatersio/slackwater-database/issues -f title= 2>/dev/null || true; } | head -n 1 | cut -d ' ' -f 2)
+          if [ "$status" != "422" ]; then
+            echo "::error::DATABASE_ISSUES_TOKEN can't create issues in openwatersio/slackwater-database: HTTP ${status:-no response}"
+            exit 1
+          fi
+
+  plan:
+    needs: token
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      # main as the job starts, so a run queued behind another plans from the history that run pushed.
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: mise.toml
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install the newest @slackwater/database
+        run: |
+          # npm prints a single published version as a string, and several as an array.
+          version=$(npm view @slackwater/database versions --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log([JSON.parse(s)].flat().at(-1)))')
+          npm install --no-save --ignore-scripts "@slackwater/database@$version"
+      - name: Check out each target's engine benchmarks
+        run: |
+          node -e 'for (const t of require("./targets.json")) console.log(t.stamp, t.engine)' |
+          while read -r stamp sha; do
+            git clone --quiet --filter=blob:none --no-checkout https://github.com/openwatersio/slackwater "engines/$stamp"
+            git -C "engines/$stamp" sparse-checkout set benchmarks
+            git -C "engines/$stamp" checkout --quiet "$sha"
+          done
+      - id: plan
+        env:
+          BACKFILL: ${{ inputs.backfill }}
+        run: npm run plan
+      - uses: actions/upload-artifact@v7
+        with:
+          name: plan
+          path: out/plan.json
+
+  score:
+    needs: plan
+    if: needs.plan.outputs.has_work == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      # One shard at a time, so IWLS sees one client at the engine's pace.
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: openwatersio/slackwater
+          ref: ${{ matrix.engine }}
+          path: engine
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: engine/mise.toml
+      - working-directory: engine
+        run: npm ci --ignore-scripts && npm run build --workspace @slackwater/engine
+      - name: Check the engine's stamp
+        working-directory: engine
+        env:
+          STAMP: ${{ matrix.stamp }}
+        run: |
+          # shellcheck disable=SC2016
+          node -e 'import("@slackwater/engine").then(({ chsCurrentFit: { stamp } }) => { if (stamp !== process.env.STAMP) { console.error(`the engine stamps ${stamp}, not ${process.env.STAMP}`); process.exit(1); } })'
+      - name: Score
+        working-directory: engine
+        env:
+          GATES_JSON: ${{ matrix.gates }}
+          GRID: ${{ matrix.grid }}
+          WINDOWS: ${{ matrix.windows }}
+          ROWS_ONLY: "1"
+        run: |
+          printf '%s' "$GATES_JSON" > "$RUNNER_TEMP/gates.json"
+          GATES="$RUNNER_TEMP/gates.json" OUT="$RUNNER_TEMP/out" node benchmarks/chs-current-fit.ts
+      # Rows and gate records only; the CHS samples stay in engine/.test-cache on this runner.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shard-${{ matrix.stamp }}-${{ matrix.shard }}
+          path: |
+            ${{ runner.temp }}/out/chs-current-fit.jsonl
+            ${{ runner.temp }}/out/chs-current-gates.jsonl
+          retention-days: 30
+
+  record:
+    needs: [plan, score]
+    if: success() && needs.plan.outputs.has_work == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.base.outputs.sha }}
+      history: ${{ steps.history.outputs.present }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          # The release tags, which number the next release.
+          fetch-depth: 0
+          persist-credentials: false
+      # Before any package code runs, so publish commits onto the main this job read.
+      - id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: mise.toml
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@v8
+        with:
+          name: plan
+          path: out
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: shard-*
+          path: shards
+      - name: Check out slackwater-database's station files
+        run: |
+          git clone --quiet --depth 1 --filter=blob:none --sparse https://github.com/openwatersio/slackwater-database database
+          git -C database sparse-checkout set stations/current/ca
+      - run: npm run record
+      # A seed whose grid points can't commit yet writes no history/.
+      - id: history
+        run: if [ -d history ]; then echo "present=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.history.outputs.present == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: history
+          path: history/
+      # Error statistics only: what publish commits and announces.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: recorded
+          path: out/
+
+  publish:
+    needs: record
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      actions: write
+    steps:
+      # The commit record read, so a push to main since then is rebased onto, never overwritten.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.record.outputs.base }}
+          fetch-depth: 0
+          persist-credentials: false
+      # Node for this repository's scripts only: this job installs no packages.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: mise.toml
+      - if: needs.record.outputs.history == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: history
+          path: history
+      - uses: actions/download-artifact@v8
+        with:
+          name: recorded
+          path: out
+      - name: Commit the history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -d history ]; then git add history; fi
+          if git diff --cached --quiet; then
+            echo "No history change"
+          else
+            git commit --quiet -F out/commit.txt
+            remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            # A push to main since record read it, such as a merged pull request, needs a rebase first.
+            git push "$remote" HEAD:main || { git pull --rebase "$remote" main && git push "$remote" HEAD:main; }
+          fi
+      # The commit pushed above, or main as record read it when the history didn't change.
+      - name: Name the releases' target
+        run: node scripts/target.ts "$(git rev-parse HEAD)"
+      # Error statistics only, with the commit the releases tag. Kept so announce can be run again from them.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: announce
+          path: out/
+          overwrite: true
+      - name: Publish releases and issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATABASE_ISSUES_TOKEN: ${{ secrets.DATABASE_ISSUES_TOKEN }}
+        run: node scripts/announce.ts
