@@ -220,6 +220,50 @@ describe("recordTarget", () => {
     expect(announcement.releases.map((r) => r.tag)).toEqual([`fit-${testFitEnd(1)}-8f85912-r1`]);
   });
 
+  test("flags a CHS revision after a run that recorded no canary", async () => {
+    const { root } = await seeded();
+    const canary = (value: string | undefined) => (gate: string) =>
+      gate === "chs-b" ? { canary: value } : {};
+    const blind = await monthlyAfterSeed(
+      root,
+      scored([1], [60, 210], undefined, undefined, canary(undefined)),
+    );
+    expect(blind.issues).toEqual([]);
+    const revised = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out3"),
+      plan: plan({ candidates: [2] }),
+      outputs: scored([2], [60, 210], undefined, undefined, canary("000000000000")),
+      tags: [SEED_TAG, ...blind.releases.map((r) => r.tag)],
+    });
+    expect(revised.issues.map((i) => i.title)).toEqual(["CHS revised predictions at chs-b"]);
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+  });
+
+  test("flags a gate that moved to a station whose metadata failed, rather than deriving its claim from the old station", async () => {
+    const { root } = await seeded();
+    const outputs = scored([1], [60, 210], ["chs-a"]);
+    outputs.gates.push(
+      record({
+        gate: "chs-b",
+        iwls: "00009",
+        flood: undefined,
+        canary: undefined,
+        reason: "IWLS has no flood axis for 00009",
+      }),
+    );
+    const announcement = await monthlyAfterSeed(root, outputs);
+    expect(announcement.issues.map((i) => i.title)).toContain(
+      "chs-b moved to another IWLS station or flood axis",
+    );
+    expect(announcement.dispatch).toBe(true);
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    expect((await readDispositions(root, key))?.gates["chs-b"]).toMatchObject({
+      status: "pending_backfill",
+      chs_fit: { tier: "final", days: 60 },
+    });
+  });
+
   test("opens an issue for a gate with no rows at a new grid point", async () => {
     const { root } = await seeded();
     const outputs = scored([1], [60, 210], ["chs-a"]);

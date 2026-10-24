@@ -134,7 +134,12 @@ export function committable(
   return { commit };
 }
 
-/** What changed under each gate since its last committed record: its IWLS station, its flood axis, or CHS's predictions. */
+/**
+ * What changed under each gate since its last committed record: its IWLS
+ * station, its flood axis, or CHS's predictions. A record with a reason still
+ * counts for the fields it has, since metadata can fail after the station
+ * resolves.
+ */
 export function stationChanges(
   previous: ReadonlyMap<string, GateRecord>,
   current: readonly GateRecord[],
@@ -142,7 +147,7 @@ export function stationChanges(
   const out: StationChange[] = [];
   for (const now of current) {
     const before = previous.get(now.gate);
-    if (!before || now.reason) continue;
+    if (!before) continue;
     if (before.iwls && now.iwls && before.iwls !== now.iwls) {
       out.push({ gate: now.gate, kind: "station", from: before.iwls, to: now.iwls });
     } else if (
@@ -159,10 +164,22 @@ export function stationChanges(
   return out;
 }
 
-/** Each gate's newest committed record that names a station. */
+/**
+ * Each gate's newest committed record that names a station. A record with no
+ * canary, as when IWLS refused the canary week, takes the one before it on the
+ * same station and axis, so a later revision is still seen.
+ */
 export function latestRecords(points: readonly { gates: GateRecord[] }[]): Map<string, GateRecord> {
   const out = new Map<string, GateRecord>();
-  for (const p of points) for (const g of p.gates) if (!g.reason && g.iwls) out.set(g.gate, g);
+  for (const p of points) {
+    for (const g of p.gates) {
+      if (g.reason || !g.iwls) continue;
+      const before = out.get(g.gate);
+      const sameStation = before?.iwls === g.iwls && before?.flood === g.flood;
+      const canary = g.canary ?? (sameStation ? before?.canary : undefined);
+      out.set(g.gate, canary ? { ...g, canary } : g);
+    }
+  }
   return out;
 }
 

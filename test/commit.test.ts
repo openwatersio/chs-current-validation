@@ -213,10 +213,36 @@ describe("stationChanges, latestRecords and sharedStations", () => {
     ]);
   });
 
-  test("ignores gates with a reason, gates it has not seen, and a missing canary", () => {
-    expect(stationChanges(before, [record({ gate: "a", reason: "x", iwls: "1" })])).toEqual([]);
+  test("sees a new IWLS station in a record whose metadata then failed", () => {
+    const failed = { flood: undefined, canary: undefined, reason: "no flood axis for 07999" };
+    expect(stationChanges(before, [record({ gate: "a", iwls: "07999", ...failed })])).toEqual([
+      { gate: "a", kind: "station", from: "07527", to: "07999" },
+    ]);
+  });
+
+  test("ignores gates it has not seen, and fields a record lacks", () => {
     expect(stationChanges(before, [record({ gate: "z", iwls: "1" })])).toEqual([]);
     expect(stationChanges(before, [record({ gate: "a", canary: undefined })])).toEqual([]);
+    const noStation = { iwls: undefined, flood: undefined, canary: undefined };
+    expect(
+      stationChanges(before, [record({ gate: "a", reason: "no IWLS station", ...noStation })]),
+    ).toEqual([]);
+  });
+
+  test("carries a canary over a newer record of the same station and axis that has none", () => {
+    const latest = latestRecords([
+      { gates: [record({ gate: "a", canary: "6d055872a12d" })] },
+      { gates: [record({ gate: "a", canary: undefined })] },
+    ]);
+    expect(latest.get("a")?.canary).toBe("6d055872a12d");
+    expect(stationChanges(latest, [record({ gate: "a", canary: "000000000000" })])).toEqual([
+      { gate: "a", kind: "revision", from: "6d055872a12d", to: "000000000000" },
+    ]);
+    const moved = latestRecords([
+      { gates: [record({ gate: "a", canary: "6d055872a12d" })] },
+      { gates: [record({ gate: "a", iwls: "07999", canary: undefined })] },
+    ]);
+    expect(moved.get("a")?.canary).toBeUndefined();
   });
 
   test("takes each gate's newest record that names a station", () => {
