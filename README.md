@@ -21,7 +21,11 @@ An online gate's `miss` carries `near_bar: true` when the gate passes the bar in
 1. **Plan** reads `targets.json`, the history and the newest `@slackwater/database` release. It decides which grid points to score and which gates to backfill, and splits the gates into shards.
 2. **Score** runs the engine benchmark in `ROWS_ONLY` mode at each target's engine commit, one shard at a time and from a cold cache. Only rows and gate records leave the job.
 3. **Record** commits each new grid point once every gate has rows or a recorded reason. It derives each gate's disposition by the disposition and stability rules, pushes the history to `main`, and decides what to publish.
-4. **Announce** publishes the release, then opens issues here: for a gate with no scored rows at a new grid point, a grid point that can't commit for a reason other than CHS's horizon, a CHS revision, or a gate that moved to another IWLS station or flood axis. Next it dispatches a follow-up run when a gate needs a backfill. Last, for the first target in `targets.json` only, it opens issues in slackwater-database for each gate whose shipped claim no longer holds in the newest year, or whose release gives it a weaker claim.
+4. **Announce** publishes the release, then opens issues here: for a gate with no scored rows at a new grid point, a grid point that can't commit for a reason other than CHS's horizon, a CHS revision, a gate that moved to another IWLS station or flood axis, or a backfill that scored no week for a gate at some committed grid point (`Backfill of <gate> failed`). Next it dispatches a follow-up run when a gate needs a backfill. Last, for the first target in `targets.json` only, it opens issues in slackwater-database for each gate whose shipped claim no longer holds in the newest year, whose release gives it a weaker claim, or that ships a fitted claim with no scored week left to support it, an `insufficient` disposition.
+
+A backfill replaces a gate's rows only at the grid points where it scored a week. Elsewhere the history keeps what it had, so a backfill that fails, say during an IWLS outage, loses nothing. A gate flagged for a backfill stays flagged until one scores it at every grid point, and until then its disposition carries over and each run tries again.
+
+GitHub keeps at most one pending run behind the one in progress, and a newer run replaces it. A `backfill` dispatched while a run is in progress can therefore be replaced by that run's follow-up or by the schedule, which backfill only the gates `state.json` flags. Dispatch it again once nothing is running or queued.
 
 The rules follow the gate confidence design in [openwatersio/slackwater-ios#752](https://github.com/openwatersio/slackwater-ios/issues/752).
 
@@ -51,4 +55,4 @@ The record job uploads `out/` as the `announce` artifact before it pushes. If pu
 
 ## Licence and data
 
-The code is MIT licensed. The repository and its releases hold error statistics only: errors in minutes and knots, counts, grid dates, event horizons and hashes. It holds no CHS predictions, samples, event times or fitted constants. Predictions are not for navigation.
+The code is MIT licensed. The repository and its releases hold error statistics only: errors in minutes and knots, counts, grid dates, event horizons and hashes. It holds no CHS predictions, samples, event times or fitted constants. Record keeps only the row and gate-record fields it declares, so a field a newer engine adds never reaches the history, and the run summary names any dropped field whose name suggests a time or a sample. Predictions are not for navigation.
