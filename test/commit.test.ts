@@ -9,6 +9,7 @@ import {
   replaceGates,
   sharedStations,
   stationChanges,
+  waitsForHorizon,
   type ScoredPoint,
 } from "../src/commit.ts";
 import type { ResultRow } from "../src/rows.ts";
@@ -155,9 +156,10 @@ describe("notScorable and committable", () => {
       rows: [...full("a", 0).map(beyond), ...full("b", 0).map(beyond)],
       gates: [record({ gate: "a" }), record({ gate: "b" })],
     };
-    expect(notScorable(point, owed(["a", "b"]))).toMatch(
-      /^CHS has not published events through .+'s \+270 d week$/,
-    );
+    const reason = notScorable(point, owed(["a", "b"]));
+    expect(reason).toMatch(/^CHS has not published events through .+'s \+270 d week$/);
+    expect(waitsForHorizon(reason!)).toBe(true);
+    expect(waitsForHorizon("no gate scored the 60-day +270 d week")).toBe(false);
   });
 
   test("waits when only a lagging gate reaches a week the current gates failed", () => {

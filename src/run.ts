@@ -12,6 +12,7 @@ import {
   replaceGates,
   sharedStations,
   stationChanges,
+  waitsForHorizon,
 } from "./commit.ts";
 import { baselineClaim, claimOf, shippedClaim, type CuratedGate } from "./curated.ts";
 import { NO_MARGIN, POOLED_GRID_POINTS } from "./derive.ts";
@@ -167,6 +168,26 @@ export async function recordTarget(input: {
   if (rescoredGrids.size)
     say(`re-scored ${[...backfill].join(", ")} over ${rescoredGrids.size} grid points`);
   if (stopped) say(`grid point ${stopped.grid} waits: ${stopped.reason}`);
+
+  // CHS's horizon moves on by itself; any other stop would hold the history back every month, unseen.
+  if (stopped && !waitsForHorizon(stopped.reason)) {
+    const fitEnd = outputs.rows.find((r) => r.grid === stopped.grid)?.fit_end.slice(0, 10);
+    const failures = [
+      ...new Set(
+        outputs.gates.flatMap((g) =>
+          (g.failures ?? []).filter((f) => f.grid === stopped.grid).map((f) => f.reason),
+        ),
+      ),
+    ];
+    out.issues.push({
+      repo: input.repo,
+      title: `Grid point ${stopped.grid} can't commit`,
+      body: [
+        `Grid point ${stopped.grid}${fitEnd ? `, the fit ending ${fitEnd},` : ""} can't commit: ${stopped.reason}. No later grid point commits until it does. Each run scores it again and comments here while it still can't.`,
+        ...(failures.length ? ["", `Gate failures recorded there: ${failures.join("; ")}.`] : []),
+      ].join("\n"),
+    });
+  }
 
   for (const p of added) {
     for (const g of p.gates) {

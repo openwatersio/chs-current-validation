@@ -74,6 +74,8 @@ export function checkComplete(point: ScoredPoint, expected: Expectation): void {
   }
 }
 
+const HORIZON_WAIT = "CHS has not published events through";
+
 /**
  * Why a complete grid point cannot commit yet, or null when it can. Every
  * recipe window and held-out week needs at least one gate that scored it, or a
@@ -104,9 +106,12 @@ export function notScorable(point: ScoredPoint, expected: Expectation): string |
     }
   }
   const beyond = point.rows.find((r) => current.has(r.gate) && r.status === "beyond_horizon");
-  return beyond
-    ? `CHS has not published events through ${beyond.gate}'s +${beyond.offset_days} d week`
-    : null;
+  return beyond ? `${HORIZON_WAIT} ${beyond.gate}'s +${beyond.offset_days} d week` : null;
+}
+
+/** Whether a grid point stopped only because CHS has not published far enough yet, which a later run fixes on its own. */
+export function waitsForHorizon(reason: string): boolean {
+  return reason.startsWith(HORIZON_WAIT);
 }
 
 /** The leading run of grid points that commit, oldest first, and why the next one didn't, so the history never skips one. */

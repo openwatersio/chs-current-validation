@@ -96,6 +96,26 @@ async function seeded() {
   return { root, announcement };
 }
 
+/** Records a monthly run of grid point 1 after the seed. */
+const monthlyAfterSeed = (root: string, outputs: Outputs) =>
+  recordTarget({
+    ...seedInput(root),
+    outDir: join(root, "out2"),
+    plan: plan({ candidates: [1] }),
+    outputs,
+    tags: [SEED_TAG],
+  });
+
+const UNSCORED = {
+  slack_errors: undefined,
+  invented: undefined,
+  extremum_errors: undefined,
+  speed_errors: undefined,
+  extrema: undefined,
+  wrong_sign: undefined,
+};
+const BEYOND_HORIZON = { status: "beyond_horizon" as const, ...UNSCORED };
+
 /**
  * Seeds chs-a alone with the given slack errors per window, shipping `fit`
  * from another history's release, so the gate is curated afresh. Returns the
@@ -217,6 +237,44 @@ describe("recordTarget", () => {
     });
     expect(announcement.issues.map((i) => i.title)).toContain("No rows for chs-b");
     expect((await readHistory(root, key)).at(-1)?.grid).toBe(1);
+  });
+
+  test("opens an issue here when a grid point can't commit for a reason other than CHS's horizon", async () => {
+    const { root } = await seeded();
+    // IWLS refused the 210-day window at grid point 1 for every gate.
+    const reason = "IWLS served 0 samples for the 210-day fit";
+    const outputs = scored([1], [60], undefined, undefined, () => ({
+      failures: [{ grid: 1, fit_days: 210, reason }],
+    }));
+    const announcement = await monthlyAfterSeed(root, outputs);
+    expect(announcement.releases).toEqual([]);
+    expect(announcement.issues).toEqual([
+      {
+        repo: "openwatersio/chs-current-validation",
+        title: "Grid point 1 can't commit",
+        body: expect.stringContaining(
+          `Grid point 1, the fit ending ${testFitEnd(1)}, can't commit: no gate scored the 210-day +0 d week.`,
+        ),
+      },
+    ]);
+    expect(announcement.issues[0].body).toContain(reason);
+    expect((await readHistory(root, key)).at(-1)?.grid).toBe(0);
+  });
+
+  test("waits on CHS's horizon with no issue", async () => {
+    const { root } = await seeded();
+    const outputs = scored([1], [60, 210]);
+    outputs.rows = outputs.rows.map((r) =>
+      r.offset_days === 270 ? { ...r, ...BEYOND_HORIZON } : r,
+    );
+    const announcement = await monthlyAfterSeed(root, outputs);
+    expect(announcement.issues).toEqual([]);
+    expect(announcement.releases).toEqual([]);
+    expect(announcement.summary).toEqual([
+      `${STAMP}: grid point 1 waits: CHS has not published events through chs-a's +270 d week`,
+      `${STAMP}: nothing changed`,
+    ]);
+    expect((await readHistory(root, key)).at(-1)?.grid).toBe(0);
   });
 
   test("asks slackwater-database to update a gate whose claim got weaker, for the target the apps ship", async () => {
