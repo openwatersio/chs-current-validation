@@ -31,7 +31,14 @@ interface StationFile {
 export async function readCurated(dir: string): Promise<Map<string, CuratedGate>> {
   const out = new Map<string, CuratedGate>();
   for (const name of (await readdir(dir)).filter((n) => n.endsWith(".yaml")).sort()) {
-    const doc = parse(await readFile(join(dir, name), "utf8")) as StationFile | null;
+    const path = join(dir, name);
+    const text = await readFile(path, "utf8");
+    let doc: StationFile | null;
+    try {
+      doc = parse(text) as StationFile | null;
+    } catch (error) {
+      throw new Error(`${path}: ${(error as Error).message}`, { cause: error });
+    }
     if (doc?.provider !== "chs") continue;
     for (const id of doc.sources ?? []) {
       out.set(id, doc.chs_fit ? { chs_fit: doc.chs_fit } : {});

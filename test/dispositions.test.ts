@@ -88,6 +88,23 @@ describe("disposeGate", () => {
     ).toMatchObject({ status: "insufficient" });
   });
 
+  test("names the gate when its claim's chs_fit can't be written", () => {
+    // A curated bound above the bounded tier's 45 minutes has no weaker fitted claim to demote
+    // to, so the gate goes online while its 210-day window fails no clause.
+    const history = points(14, (grid) => [
+      ...year({ grid, fit_days: 60, slack_errors: [5, 52] }),
+      ...year({ grid }),
+    ]);
+    expect(() =>
+      disposeGate({
+        points: history,
+        gate: "chs-active-pass",
+        baseline: { tier: "bounded", days: 60, bound: 50 },
+        pending: false,
+      }),
+    ).toThrow(/^chs-active-pass: an online claim whose 210-day window fails no clause$/);
+  });
+
   test("carries a gate's previous chs_fit while it waits for a backfill", () => {
     const d = disposeGate({
       points: points(14),

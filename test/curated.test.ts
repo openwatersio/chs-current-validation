@@ -44,6 +44,12 @@ describe("readCurated", () => {
     ]);
     expect(curated.get("chs-active-pass")?.chs_fit?.tier).toBe("bounded");
   });
+
+  test("names a station file it can't parse", async () => {
+    const dir = await stationFiles();
+    await writeFile(join(dir, "broken.yaml"), "provider: chs\nsources: [chs-broken\n");
+    await expect(readCurated(dir)).rejects.toThrow(/broken\.yaml/);
+  });
 });
 
 describe("curated claims", () => {

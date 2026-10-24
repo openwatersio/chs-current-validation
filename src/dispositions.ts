@@ -70,10 +70,17 @@ export function disposeGate(input: {
     return { status: "insufficient", note: "no scored week in the year one grid point earlier" };
   }
   const { claim, change } = stabilize({ curated: input.baseline, newest, previous });
+  const fit = (c: Claim) => {
+    try {
+      return chsFit(c, newest, previous);
+    } catch (error) {
+      throw new Error(`${gate}: ${(error as Error).message}`, { cause: error });
+    }
+  };
   return {
     status: change,
-    chs_fit: chsFit(claim, newest, previous),
-    measured: chsFit(measuredClaim(newest), newest, previous),
+    chs_fit: fit(claim),
+    measured: fit(measuredClaim(newest)),
     windows: newest,
   };
 }
