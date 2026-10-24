@@ -141,6 +141,8 @@ export function planTarget(input: {
       ? ids
       : [...input.backfill, ...ids.filter((id) => !input.known.has(id))];
   const backfill = [...new Set(wanted)].filter((id) => ids.includes(id)).sort();
+  // The 14 newest committed points as well as the new ones: if CHS has not published far enough
+  // for the new points to commit, only last-13..last stay, and old-station rows must not remain.
   const backfillGrid = backfill.length
     ? range(Math.max(first, last - SEED_GRID_POINTS + 1), Math.max(last, newest))
     : [];

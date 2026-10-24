@@ -110,6 +110,22 @@ describe("planTarget", () => {
     expect(all.backfill).toEqual([...ids(3)]);
     expect(all.shards.every((s) => s.id.startsWith("backfill-"))).toBe(true);
   });
+
+  test("backfills over the 14 newest committed grid points and the new ones", () => {
+    const plan = planTarget({
+      ...base,
+      committed: range(-29, 0),
+      known: ids(3),
+      gates: gates(3),
+      backfill: ["chs-gate-01"],
+    });
+    expect(plan.candidates).toEqual([1]);
+    expect(plan.backfillGrid).toEqual(range(-13, 1));
+    const backfill = plan.shards.filter((s) => s.id.startsWith("backfill-"));
+    expect(backfill.map((s) => [s.gates.map((g) => g.id), s.grid])).toEqual([
+      [["chs-gate-01"], "-13..1"],
+    ]);
+  });
 });
 
 describe("windows", () => {
