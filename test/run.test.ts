@@ -7,7 +7,8 @@ import { historyDir, readHistory, readState, writeState } from "../src/history.t
 import { range, type GateInput, type TargetPlan } from "../src/plan.ts";
 import { readDispositions } from "../src/release.ts";
 import type { GateRecord, ResultRow } from "../src/rows.ts";
-import { DATABASE_REPO, recordTarget, type Outputs } from "../src/run.ts";
+import { DATABASE_REPO } from "../src/github.ts";
+import { recordTarget, type Outputs } from "../src/run.ts";
 import { STAMP, record, row, testFitEnd } from "./builders.ts";
 
 const DAY = 86_400_000;

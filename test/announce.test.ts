@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { announce } from "../src/announce.ts";
-import type { Gh } from "../src/github.ts";
-import { DATABASE_REPO, type Announcement } from "../src/run.ts";
+import { DATABASE_REPO, type Gh } from "../src/github.ts";
+import type { Announcement } from "../src/run.ts";
 
 const REPO = "openwatersio/chs-current-validation";
 const PUBLISHED = "fit-2026-10-29-8f85912-r1";

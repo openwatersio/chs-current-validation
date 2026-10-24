@@ -18,7 +18,7 @@ import {
 import { baselineClaim, claimOf, shippedClaim, type CuratedGate } from "./curated.ts";
 import { NO_MARGIN, POOLED_GRID_POINTS, RECIPE_WINDOWS } from "./derive.ts";
 import { disposeGate, type GateDisposition } from "./dispositions.ts";
-import type { IssueRequest } from "./github.ts";
+import { DATABASE_REPO, type IssueRequest } from "./github.ts";
 import {
   gridPointFiles,
   readHistory,
@@ -47,8 +47,6 @@ import {
   type DispositionsDocument,
 } from "./release.ts";
 import type { GateRecord, ResultRow } from "./rows.ts";
-
-export const DATABASE_REPO = "openwatersio/slackwater-database";
 
 export interface Outputs {
   rows: ResultRow[];

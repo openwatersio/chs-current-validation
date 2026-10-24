@@ -55,7 +55,7 @@ jobs:
         run: |
           # npm prints a single published version as a string, and several as an array.
           version=$(npm view @slackwater/database versions --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log([JSON.parse(s)].flat().at(-1)))')
-          npm install --no-save "@slackwater/database@$version"
+          npm install --no-save --ignore-scripts "@slackwater/database@$version"
       - name: Check out each target's engine benchmarks
         run: |
           node -e 'for (const t of require("./targets.json")) console.log(t.stamp, t.engine)' |

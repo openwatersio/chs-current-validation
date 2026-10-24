@@ -4,8 +4,9 @@
 // failing one loses nothing else. Safe to run again from the same
 // announcement, because a release that already exists is skipped and the rest
 // is filed again.
-import { fileIssues, type Gh } from "./github.ts";
-import { DATABASE_REPO, type Announcement } from "./run.ts";
+// This module and its imports load no package code: announce runs holding both write tokens.
+import { DATABASE_REPO, fileIssues, type Gh } from "./github.ts";
+import type { Announcement } from "./run.ts";
 
 export async function announce(
   a: Announcement,

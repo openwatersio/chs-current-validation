@@ -5,6 +5,8 @@ import { promisify } from "node:util";
 
 const run = promisify(execFile);
 
+export const DATABASE_REPO = "openwatersio/slackwater-database";
+
 export interface Gh {
   openIssues(repo: string): Promise<{ number: number; title: string }[]>;
   createIssue(repo: string, title: string, body: string): Promise<void>;
