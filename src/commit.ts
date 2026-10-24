@@ -76,22 +76,11 @@ export function checkComplete(point: ScoredPoint, expected: Expectation): void {
 
 /**
  * Why a complete grid point cannot commit yet, or null when it can. Every
- * recipe window and held-out week needs at least one gate that scored it, or
- * every gate beyond the horizon; the 365-day window is report-only, so its
- * failures never hold a grid point back.
+ * recipe window and held-out week needs at least one gate that scored it, or a
+ * gate at the newest horizon beyond it, which the horizon check reports; the
+ * 365-day window is report-only, so its failures never hold a grid point back.
  */
 export function notScorable(point: ScoredPoint, expected: Expectation): string | null {
-  const owed = new Set([...expected.gates.values()].flat());
-  for (const days of RECIPE_WINDOWS.filter((d) => owed.has(d))) {
-    for (const offset of expected.offsets) {
-      const group = point.rows.filter((r) => r.fit_days === days && r.offset_days === offset);
-      // A week every gate has beyond the horizon is the horizon check's to judge.
-      if (group.length > 0 && group.every((r) => r.status === "beyond_horizon")) continue;
-      if (!group.some((r) => r.status === "scored")) {
-        return `no gate scored the ${days}-day +${offset} d week`;
-      }
-    }
-  }
   const newest = point.gates
     .map((g) => g.horizon)
     .filter((h): h is string => h !== undefined)
@@ -101,6 +90,19 @@ export function notScorable(point: ScoredPoint, expected: Expectation): string |
   // horizon, and that is its reason; the grid point waits only for CHS to
   // publish through the newest horizon.
   const current = new Set(point.gates.filter((g) => g.horizon === newest).map((g) => g.gate));
+  const owed = new Set([...expected.gates.values()].flat());
+  for (const days of RECIPE_WINDOWS.filter((d) => owed.has(d))) {
+    for (const offset of expected.offsets) {
+      const group = point.rows.filter((r) => r.fit_days === days && r.offset_days === offset);
+      // Skip a week one of whose rows is a current gate's beyond the horizon:
+      // the horizon check below reports it. A lagging gate's beyond-horizon row
+      // is that gate's own reason, so it cannot stand in for a scored week.
+      if (group.some((r) => current.has(r.gate) && r.status === "beyond_horizon")) continue;
+      if (!group.some((r) => r.status === "scored")) {
+        return `no gate scored the ${days}-day +${offset} d week`;
+      }
+    }
+  }
   const beyond = point.rows.find((r) => current.has(r.gate) && r.status === "beyond_horizon");
   return beyond
     ? `CHS has not published events through ${beyond.gate}'s +${beyond.offset_days} d week`

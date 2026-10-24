@@ -147,6 +147,43 @@ describe("notScorable and committable", () => {
     expect(notScorable({ grid: 0, rows, gates }, owed(["a", "b"]))).toBeNull();
   });
 
+  test("leaves a week every current gate has beyond the horizon to the horizon check", () => {
+    const beyond = (r: ResultRow) =>
+      r.offset_days === 270 ? { ...r, status: "beyond_horizon" as const } : r;
+    const point = {
+      grid: 0,
+      rows: [...full("a", 0).map(beyond), ...full("b", 0).map(beyond)],
+      gates: [record({ gate: "a" }), record({ gate: "b" })],
+    };
+    expect(notScorable(point, owed(["a", "b"]))).toMatch(
+      /^CHS has not published events through .+'s \+270 d week$/,
+    );
+  });
+
+  test("waits when only a lagging gate reaches a week the current gates failed", () => {
+    const point = {
+      grid: 0,
+      rows: [
+        ...full("a", 0, [210]),
+        ...full("b", 0).map((r) =>
+          r.fit_days === 60 && r.offset_days === 270
+            ? { ...r, status: "beyond_horizon" as const }
+            : r,
+        ),
+      ],
+      gates: [
+        record({
+          gate: "a",
+          horizon: "2027-12-31T00:00:00Z",
+          failures: [{ grid: 0, fit_days: 60, reason: "refused" }],
+        }),
+        record({ gate: "b", horizon: "2027-01-01T00:00:00Z" }),
+      ],
+    };
+    expect(() => checkComplete(point, owed(["a", "b"]))).not.toThrow();
+    expect(notScorable(point, owed(["a", "b"]))).toBe("no gate scored the 60-day +270 d week");
+  });
+
   test("commits only the leading run of scorable grid points", () => {
     const points: ScoredPoint[] = [0, 1, 2].map((grid) => ({
       grid,
