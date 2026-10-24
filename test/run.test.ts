@@ -693,6 +693,49 @@ describe("recordTarget", () => {
     expect(announcement.issues[0].body).toContain("IWLS served 0 samples");
   });
 
+  test("keeps a flagged gate's committed rows where its backfill scored one recipe window but not the other", async () => {
+    const { root } = await seeded();
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    const before = await readHistory(root, key);
+    // IWLS refused chs-b's 210-day fit at grid point 0, and its report-only 365-day fit at -1.
+    const refused210 = "IWLS refused the 210-day fit";
+    const outputs = scored(
+      range(-13, 0),
+      [60, 210, 365],
+      ["chs-b"],
+      () => ({ iwls: "00003" }),
+      () => ({
+        iwls: "00003",
+        failures: [
+          { grid: -1, fit_days: 365, reason: "IWLS refused the 365-day fit" },
+          { grid: 0, fit_days: 210, reason: refused210 },
+        ],
+      }),
+    );
+    outputs.rows = outputs.rows.filter(
+      (r) => !(r.grid === 0 && r.fit_days === 210) && !(r.grid === -1 && r.fit_days === 365),
+    );
+    const announcement = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out2"),
+      plan: plan({ backfill: ["chs-b"], backfillGrid: range(-13, 0) }),
+      outputs,
+      tags: [SEED_TAG],
+    });
+    const history = await readHistory(root, key);
+    expect(history.at(-1)).toEqual(before.at(-1));
+    const stationsOfB = history.map((p) => [
+      ...new Set(p.rows.filter((r) => r.gate === "chs-b").map((r) => r.iwls)),
+    ]);
+    expect(stationsOfB).toEqual([...range(-13, -1).map(() => ["00003"]), ["00002"]]);
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    expect(announcement.issues.map((i) => i.title)).toEqual(["Backfill of chs-b failed"]);
+    expect(announcement.issues[0].body).toContain(
+      `At the fit ending ${testFitEnd(0)}, it scored no 210-day week: ${refused210}.`,
+    );
+    expect(announcement.issues[0].body).not.toContain(testFitEnd(-1));
+  });
+
   test("leaves the history byte-identical and readable when a backfill of every gate scores nothing", async () => {
     const { root } = await seeded();
     const before = await snapshot(historyDir(root, key));

@@ -16,7 +16,7 @@ import {
   waitsForHorizon,
 } from "./commit.ts";
 import { baselineClaim, claimOf, shippedClaim, type CuratedGate } from "./curated.ts";
-import { NO_MARGIN, POOLED_GRID_POINTS } from "./derive.ts";
+import { NO_MARGIN, POOLED_GRID_POINTS, RECIPE_WINDOWS } from "./derive.ts";
 import { disposeGate, type GateDisposition } from "./dispositions.ts";
 import type { IssueRequest } from "./github.ts";
 import {
@@ -75,10 +75,13 @@ function sameFiles(a: GridPoint, b: GridPoint): boolean {
   return x.rows === y.rows && x.gates === y.gates;
 }
 
-/** A backfilled gate at a committed grid point where it scored no week. */
+/** A backfilled gate at a committed grid point where some recipe window scored no week. */
 interface Unscored {
   fitEnd: string;
+  /** The recipe windows with no scored week. */
+  windows: number[];
   record: GateRecord;
+  /** The gate's rows in those windows. */
   rows: ResultRow[];
 }
 
@@ -180,8 +183,8 @@ export async function recordTarget(input: {
   const added: GridPoint[] = commit.map((p) => ({ ...p, fitEnd: p.rows[0].fit_end.slice(0, 10) }));
 
   // Backfilled gates over grid points already committed. A gate's committed
-  // rows give way only where its backfill scored a week, so a backfill that
-  // fails never loses evidence.
+  // rows give way only where its backfill scored a week in each recipe window,
+  // so a backfill that fails never loses the evidence its dispositions use.
   const backfillGrid = new Set(backfill.size ? plan.backfillGrid : []);
   const owedBackfill = {
     gates: new Map([...backfill].map((id) => [id, FULL_WINDOWS])),
@@ -198,9 +201,15 @@ export async function recordTarget(input: {
       [point.grid],
     );
     checkComplete(fresh, owedBackfill);
-    const scoredHere = new Set(fresh.rows.filter((r) => r.status === "scored").map((r) => r.gate));
+    const scoredHere = new Set<string>();
     for (const id of backfill) {
-      if (scoredHere.has(id)) {
+      // The 365-day window is report-only, so its failure never holds back a replace.
+      const windows: number[] = RECIPE_WINDOWS.filter(
+        (days) =>
+          !fresh.rows.some((r) => r.gate === id && r.fit_days === days && r.status === "scored"),
+      );
+      if (!windows.length) {
+        scoredHere.add(id);
         replaced.add(id);
         continue;
       }
@@ -208,9 +217,10 @@ export async function recordTarget(input: {
         ...(unscored.get(id) ?? []),
         {
           fitEnd: point.fitEnd,
+          windows,
           // checkComplete has made sure every backfilled gate has a record here.
           record: fresh.gates.find((g) => g.gate === id)!,
-          rows: fresh.rows.filter((r) => r.gate === id),
+          rows: fresh.rows.filter((r) => r.gate === id && windows.includes(r.fit_days)),
         },
       ]);
     }
@@ -232,7 +242,7 @@ export async function recordTarget(input: {
     latestRecords(history),
     outputs.gates.filter((g) => !backfill.has(g.gate)),
   );
-  // A flagged gate stays flagged until a backfill scores it at every grid point, so its disposition never pools two stations.
+  // A flagged gate stays flagged until a backfill scores both recipe windows at every grid point it covers, so its disposition never pools two stations.
   const flagged = [
     ...new Set([
       ...state.needs_backfill.filter((id) => !backfill.has(id) || unscored.has(id)),
@@ -288,11 +298,15 @@ export async function recordTarget(input: {
       });
     }
   }
-  // A backfilled gate with no scored week at a committed grid point, such as a new gate with no IWLS station nearby.
+  // A backfilled gate missing a recipe window at a committed grid point, such as a new gate with no IWLS station nearby.
   for (const [id, missed] of unscored) {
     const newest = missed[missed.length - 1];
+    const { record } = newest;
+    const failures = (record.failures ?? []).filter(
+      (f) => f.fit_days === undefined || newest.windows.includes(f.fit_days),
+    );
     const reason = [
-      noRowsReason(newest.record),
+      record.reason ?? failures.map((f) => f.reason).join("; "),
       newest.rows.length ? statusReason(newest.rows) : "",
     ]
       .filter(Boolean)
@@ -300,10 +314,11 @@ export async function recordTarget(input: {
     const flagNote = flagged.includes(id)
       ? " It stays flagged for a backfill, so its disposition carries over and the next run tries again."
       : "";
+    const windows = newest.windows.map((days) => `${days}-day`).join(" or ");
     out.issues.push({
       repo: input.repo,
       title: `Backfill of ${id} failed`,
-      body: `A backfill re-scored \`${id}\` but scored no week at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}: ${reason}.`,
+      body: `A backfill re-scored \`${id}\` but didn't score a week in every recipe window at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}, it scored no ${windows} week: ${reason}.`,
     });
   }
   for (const c of changes) {
