@@ -2,12 +2,12 @@ import { mkdtemp, readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import type { CuratedGate } from "../src/curated.ts";
+import type { ChsFitRecord, CuratedGate } from "../src/curated.ts";
 import { historyDir, readHistory, readState, writeState } from "../src/history.ts";
 import { range, type GateInput, type TargetPlan } from "../src/plan.ts";
 import { readDispositions } from "../src/release.ts";
 import type { GateRecord, ResultRow } from "../src/rows.ts";
-import { recordTarget, type Outputs } from "../src/run.ts";
+import { DATABASE_REPO, recordTarget, type Outputs } from "../src/run.ts";
 import { STAMP, record, row, testFitEnd } from "./builders.ts";
 
 const DAY = 86_400_000;
@@ -23,7 +23,7 @@ function scored(
   grids: number[],
   windows: number[],
   gates = GATES.map((g) => g.id),
-  tweak: (gate: string, grid: number) => Partial<ResultRow> = () => ({}),
+  tweak: (gate: string, grid: number, days: number) => Partial<ResultRow> = () => ({}),
   recordTweak: (gate: string) => Partial<GateRecord> = () => ({}),
 ): Outputs {
   const rows = grids.flatMap((grid) =>
@@ -39,7 +39,7 @@ function scored(
             offset_days,
             fit_end: new Date(fitEnd).toISOString().replace(".000Z", "Z"),
             week_start: new Date(fitEnd + offset_days * DAY).toISOString().replace(".000Z", "Z"),
-            ...tweak(gate, grid),
+            ...tweak(gate, grid, fit_days),
           });
         }),
       ),
@@ -94,6 +94,28 @@ async function seeded() {
   const root = await mkdtemp(join(tmpdir(), "run-"));
   const announcement = await recordTarget(seedInput(root));
   return { root, announcement };
+}
+
+/**
+ * Seeds chs-a alone with the given slack errors per window, shipping `fit`
+ * from another history's release, so the gate is curated afresh. Returns the
+ * slackwater-database issues.
+ */
+async function freshlyCurated(fit: ChsFitRecord, errors: Record<number, (number | null)[]>) {
+  const root = await mkdtemp(join(tmpdir(), "run-"));
+  const announcement = await recordTarget({
+    ...seedInput(root),
+    gates: [GATES[0]],
+    outputs: scored(range(-13, 0), [60, 210, 365], ["chs-a"], (_gate, _grid, days) =>
+      errors[days] ? { slack_errors: errors[days] } : {},
+    ),
+    curated: new Map([["chs-a", { chs_fit: { ...fit, evidence: "fit-2026-01-01-0000000-r1" } }]]),
+  });
+  const doc = await readDispositions(root, key);
+  return {
+    issues: announcement.issues.filter((i) => i.repo === DATABASE_REPO),
+    disposition: doc?.gates["chs-a"],
+  };
 }
 
 describe("recordTarget", () => {
@@ -229,6 +251,57 @@ describe("recordTarget", () => {
       ships: false,
     });
     expect(upcoming.issues).toEqual([]);
+  });
+
+  test("asks slackwater-database to update a freshly curated gate whose shipped window no longer holds, though the release's claim ranks stronger", async () => {
+    // The 210-day worst is now 50 minutes; the 60-day fit passes at 33.
+    const { issues, disposition } = await freshlyCurated(
+      { tier: "bounded", days: 210, slack_bound_minutes: 40 },
+      { 60: [5, 5, 5, 33], 210: [5, 5, 5, 50] },
+    );
+    expect(disposition).toMatchObject({
+      status: "fresh",
+      chs_fit: { tier: "bounded", days: 60, slack_bound_minutes: 35 },
+    });
+    expect(issues).toHaveLength(1);
+    expect(issues[0].title).toBe("Update chs_fit for chs-a");
+    expect(issues[0].body).toContain("the claim `chs-a` ships no longer holds");
+    expect(issues[0].body).not.toContain("weaker");
+    expect(issues[0].body).toContain("- Ships: bounded 40 min, 210 d");
+    expect(issues[0].body).toContain("- Release: bounded 35 min, 60 d (fresh)");
+  });
+
+  test("asks slackwater-database to update a freshly curated gate whose shipped provisional answer no longer qualifies", async () => {
+    // The 210-day worst is 33 minutes; the 60-day fit misses a slack.
+    const { issues, disposition } = await freshlyCurated(
+      { tier: "bounded", days: 210, slack_bound_minutes: 40, provisional_slack_minutes: 45 },
+      { 60: [5, 5, 5, null], 210: [5, 5, 5, 33] },
+    );
+    expect(disposition?.chs_fit).toEqual({ tier: "bounded", days: 210, slack_bound_minutes: 35 });
+    expect(issues).toHaveLength(1);
+    expect(issues[0].title).toBe("Update chs_fit for chs-a");
+    expect(issues[0].body).toContain("the claim `chs-a` ships no longer holds");
+    expect(issues[0].body).not.toContain("weaker");
+  });
+
+  test("still asks slackwater-database to update a gate whose shipped claim holds but whose release claim is weaker", async () => {
+    // The 60-day worst of 29 minutes holds the shipped final claim, but a fresh claim needs the promotion margin.
+    const { issues, disposition } = await freshlyCurated(
+      { tier: "final", days: 60 },
+      { 60: [5, 5, 5, 29.5], 210: [5, 5, 5, 29.5] },
+    );
+    expect(disposition?.chs_fit).toEqual({ tier: "bounded", days: 60, slack_bound_minutes: 35 });
+    expect(issues).toHaveLength(1);
+    expect(issues[0].body).toContain("gives `chs-a` a weaker claim than the one it ships");
+    expect(issues[0].body).not.toContain("no longer holds");
+  });
+
+  test("files no slackwater-database issue when the shipped claim holds and the release's is no weaker", async () => {
+    const { issues } = await freshlyCurated(
+      { tier: "bounded", days: 60, slack_bound_minutes: 40 },
+      {},
+    );
+    expect(issues).toEqual([]);
   });
 
   test("replaces a backfilled gate's rows and clears its flag", async () => {

@@ -3,7 +3,7 @@
 // disposition, the release and the issues.
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { compareClaims } from "./claims.ts";
+import { compareClaims, supports } from "./claims.ts";
 import {
   byGridPoint,
   checkComplete,
@@ -14,7 +14,7 @@ import {
   stationChanges,
 } from "./commit.ts";
 import { baselineClaim, claimOf, shippedClaim, type CuratedGate } from "./curated.ts";
-import { POOLED_GRID_POINTS } from "./derive.ts";
+import { NO_MARGIN, POOLED_GRID_POINTS } from "./derive.ts";
 import { disposeGate, type GateDisposition } from "./dispositions.ts";
 import type { IssueRequest } from "./github.ts";
 import {
@@ -280,15 +280,22 @@ export async function recordTarget(input: {
   if (input.ships) {
     for (const [id, d] of Object.entries(gates)) {
       if (!d.chs_fit) continue;
-      const shipped = input.curated.get(id)?.chs_fit;
-      if (compareClaims(claimOf(d.chs_fit), shippedClaim(input.curated.get(id))) <= 0) continue;
+      const curatedFit = input.curated.get(id)?.chs_fit;
+      const shipped = shippedClaim(input.curated.get(id));
+      // A gate curated afresh can rank stronger than what it ships while the shipped claim is false.
+      const holds = !d.windows || supports(d.windows, shipped, NO_MARGIN);
+      const weaker = compareClaims(claimOf(d.chs_fit), shipped) > 0;
+      if (holds && !weaker) continue;
+      const release = `[${tag}](https://github.com/${input.repo}/releases/tag/${tag})`;
       out.issues.push({
         repo: DATABASE_REPO,
         title: `Update chs_fit for ${id}`,
         body: [
-          `The CHS current validation release [${tag}](https://github.com/${input.repo}/releases/tag/${tag}) gives \`${id}\` a weaker claim than the one it ships.`,
+          holds
+            ? `The CHS current validation release ${release} gives \`${id}\` a weaker claim than the one it ships.`
+            : `In the newest year of the CHS current validation release ${release}, the claim \`${id}\` ships no longer holds.${weaker ? " The release's own claim is weaker too." : ""}`,
           "",
-          `- Ships: ${shipped ? describeFit(shipped) : "online, unmeasured"}`,
+          `- Ships: ${curatedFit ? describeFit(curatedFit) : "online, unmeasured"}`,
           `- Release: ${describeFit(d.chs_fit)} (${d.status})`,
           `- Newest year alone: ${describeFit(d.measured)}`,
           "",
