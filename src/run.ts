@@ -65,6 +65,8 @@ export interface Announcement {
   issues: IssueRequest[];
   dispatch: boolean;
   summary: string[];
+  /** The commit each release tags: the history commit the publish job pushed, which it records before announcing. */
+  target?: string;
 }
 
 function sameFiles(a: GridPoint, b: GridPoint): boolean {

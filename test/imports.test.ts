@@ -31,9 +31,13 @@ async function packageImports(entry: string): Promise<string[]> {
   return found;
 }
 
-test("announce loads no package code, since it runs holding both write tokens", async () => {
-  expect(await packageImports("scripts/announce.ts")).toEqual([]);
-});
+// The publish job holds the write tokens and installs no packages, so its scripts must need none.
+test.each(["scripts/target.ts", "scripts/announce.ts"])(
+  "%s, which the publish job runs, loads no package code",
+  async (script) => {
+    expect(await packageImports(script)).toEqual([]);
+  },
+);
 
 test("the import walk finds a package behind local imports and skips type-only ones", async () => {
   expect(await packageImports("scripts/record.ts")).toContain("src/curated.ts: yaml");

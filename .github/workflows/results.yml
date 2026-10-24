@@ -12,31 +12,23 @@ on:
         default: ""
 
 concurrency:
-  # Per ref, so a run on another branch, which plan skips, can't displace a pending follow-up on main.
+  # Per ref, so a run on another branch, which token skips, can't displace a pending follow-up on main.
   group: results-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
   contents: read
 
+# No job that holds a write token installs or runs package code: plan, score
+# and record run it with read-only tokens, and publish, which holds them,
+# runs only git, gh and this repository's own scripts with node.
 jobs:
-  plan:
-    # Record pushes to main, so a run from another branch would put that branch's commits there.
+  token:
+    # Publish pushes to main, so a run from another branch would put that branch's commits there.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
-      has_work: ${{ steps.plan.outputs.has_work }}
+    permissions: {}
     steps:
-      # main as the job starts, so a run queued behind another plans from the history that run pushed.
-      - uses: actions/checkout@v7
-        with:
-          ref: main
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: mise.toml
-          cache: npm
-      - run: npm ci --ignore-scripts
       # Before hours of scoring, so a token that can't file issues fails the run at once. An
       # issue with an empty title is invalid, so the probe creates nothing: a token that may
       # create issues gets HTTP 422, and one that may not gets 401, 403 or 404.
@@ -51,6 +43,24 @@ jobs:
             echo "::error::DATABASE_ISSUES_TOKEN can't create issues in openwatersio/slackwater-database: HTTP ${status:-no response}"
             exit 1
           fi
+
+  plan:
+    needs: token
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      # main as the job starts, so a run queued behind another plans from the history that run pushed.
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: mise.toml
+          cache: npm
+      - run: npm ci --ignore-scripts
       - name: Install the newest @slackwater/database
         run: |
           # npm prints a single published version as a string, and several as an array.
@@ -126,17 +136,19 @@ jobs:
     needs: [plan, score]
     if: success() && needs.plan.outputs.has_work == 'true'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      actions: write
+    outputs:
+      base: ${{ steps.base.outputs.sha }}
+      history: ${{ steps.history.outputs.present }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: main
+          # The release tags, which number the next release.
           fetch-depth: 0
-          # The write token stays out of .git/config while dependency code runs; the commit step pushes with it.
           persist-credentials: false
+      # Before any package code runs, so publish commits onto the main this job read.
+      - id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
         with:
           node-version-file: mise.toml
@@ -155,26 +167,71 @@ jobs:
           git clone --quiet --depth 1 --filter=blob:none --sparse https://github.com/openwatersio/slackwater-database database
           git -C database sparse-checkout set stations/current/ca
       - run: npm run record
-      # Error statistics only. Kept so a failed announce can be re-run from them.
+      # A seed whose grid points can't commit yet writes no history/.
+      - id: history
+        run: if [ -d history ]; then echo "present=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.history.outputs.present == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: history
+          path: history/
+      # Error statistics only: what publish commits and announces.
       - uses: actions/upload-artifact@v7
         with:
-          name: announce
+          name: recorded
           path: out/
+
+  publish:
+    needs: record
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      actions: write
+    steps:
+      # The commit record read, so a push to main since then is rebased onto, never overwritten.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.record.outputs.base }}
+          fetch-depth: 0
+          persist-credentials: false
+      # Node for this repository's scripts only: this job installs no packages.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: mise.toml
+      - if: needs.record.outputs.history == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: history
+          path: history
+      - uses: actions/download-artifact@v8
+        with:
+          name: recorded
+          path: out
       - name: Commit the history
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # A seed whose grid points can't commit yet writes no history/.
           if [ -d history ]; then git add history; fi
-          if git diff --cached --quiet; then echo "No history change"; exit 0; fi
-          git commit --quiet -F out/commit.txt
-          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          # A push to main during this job, such as a merged pull request, needs a rebase first.
-          git push "$remote" HEAD:main || { git pull --rebase "$remote" main && git push "$remote" HEAD:main; }
+          if git diff --cached --quiet; then
+            echo "No history change"
+          else
+            git commit --quiet -F out/commit.txt
+            remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            # A push to main since record read it, such as a merged pull request, needs a rebase first.
+            git push "$remote" HEAD:main || { git pull --rebase "$remote" main && git push "$remote" HEAD:main; }
+          fi
+          node scripts/target.ts "$(git rev-parse HEAD)"
+      # Error statistics only, with the commit the releases tag. Kept so announce can be run again from them.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: announce
+          path: out/
+          overwrite: true
       - name: Publish releases and issues
         env:
           GH_TOKEN: ${{ github.token }}
           DATABASE_ISSUES_TOKEN: ${{ secrets.DATABASE_ISSUES_TOKEN }}
-        run: npm run announce
+        run: node scripts/announce.ts
