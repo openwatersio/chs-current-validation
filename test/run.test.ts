@@ -97,11 +97,11 @@ async function seeded() {
 }
 
 /** Records a monthly run of grid point 1 after the seed. */
-const monthlyAfterSeed = (root: string, outputs: Outputs) =>
+const monthlyAfterSeed = (root: string, outputs: Outputs, overrides: Partial<TargetPlan> = {}) =>
   recordTarget({
     ...seedInput(root),
     outDir: join(root, "out2"),
-    plan: plan({ candidates: [1] }),
+    plan: plan({ candidates: [1], ...overrides }),
     outputs,
     tags: [SEED_TAG],
   });
@@ -521,8 +521,9 @@ describe("recordTarget", () => {
     ).toEqual([SEED_TAG, tag]);
   });
 
-  test("records a backfilled gate that has only a reason, and opens an issue for it", async () => {
+  test("opens an issue for a new gate whose backfill has only a reason, and leaves the history as it was", async () => {
     const { root } = await seeded();
+    const before = await snapshot(historyDir(root, key));
     const reason = "no IWLS station within 3 km";
     const announcement = await recordTarget({
       root,
@@ -536,13 +537,90 @@ describe("recordTarget", () => {
       ships: true,
       repo: "openwatersio/chs-current-validation",
     });
+    expect(await snapshot(historyDir(root, key))).toEqual(before);
+    expect(announcement.issues.map((i) => i.title)).toEqual(["Backfill of chs-c failed"]);
+    expect(announcement.issues[0].body).toContain(reason);
+  });
+
+  test("keeps a flagged gate's committed rows and flag when its backfill scores nothing, and opens an issue", async () => {
+    const { root } = await seeded();
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    const before = await readHistory(root, key);
+    // chs-b moved to a station whose metadata fails; chs-a scores grid point 1 as usual.
+    const reason = "IWLS has no flood axis for 00003";
+    const outputs = scored([1], [60, 210], ["chs-a"]);
+    outputs.gates.push(record({ gate: "chs-b", iwls: "00003", reason }));
+    const announcement = await monthlyAfterSeed(root, outputs, {
+      backfill: ["chs-b"],
+      backfillGrid: range(-13, 1),
+    });
     const history = await readHistory(root, key);
-    expect(history.map((p) => p.grid)).toEqual(range(-13, 0));
-    expect(
-      history.every((p) => p.gates.some((g) => g.gate === "chs-c" && g.reason === reason)),
-    ).toBe(true);
-    expect(announcement.issues.filter((i) => i.title === "No rows for chs-c")).toHaveLength(1);
-    expect((await readState(root, key)).needs_backfill).toEqual([]);
+    expect(history.map((p) => p.grid)).toEqual(range(-13, 1));
+    expect(history.slice(0, -1)).toEqual(before);
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    const issue = announcement.issues.find((i) => i.title === "Backfill of chs-b failed");
+    expect(issue?.body).toContain(reason);
+    expect(issue?.body).toContain("stays flagged");
+    expect((await readDispositions(root, key))?.gates["chs-b"]).toMatchObject({
+      status: "pending_backfill",
+      chs_fit: { tier: "final", days: 60 },
+    });
+  });
+
+  test("replaces a flagged gate only where its backfill scored, and keeps its flag", async () => {
+    const { root } = await seeded();
+    await writeState(root, key, { needs_backfill: ["chs-b"] });
+    const outputs = scored(
+      range(-12, 0),
+      [60, 210, 365],
+      ["chs-b"],
+      () => ({ iwls: "00003" }),
+      () => ({ iwls: "00003", failures: [{ grid: -13, reason: "IWLS served 0 samples" }] }),
+    );
+    const announcement = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out2"),
+      plan: plan({ backfill: ["chs-b"], backfillGrid: range(-13, 0) }),
+      outputs,
+      tags: [SEED_TAG],
+    });
+    const stationsOfB = (await readHistory(root, key)).map(
+      (p) => p.rows.find((r) => r.gate === "chs-b")?.iwls,
+    );
+    expect(stationsOfB).toEqual(["00002", ...range(-12, 0).map(() => "00003")]);
+    expect((await readState(root, key)).needs_backfill).toEqual(["chs-b"]);
+    expect(announcement.issues.map((i) => i.title)).toEqual(["Backfill of chs-b failed"]);
+    expect(announcement.issues[0].body).toContain(testFitEnd(-13));
+    expect(announcement.issues[0].body).toContain("IWLS served 0 samples");
+  });
+
+  test("leaves the history byte-identical and readable when a backfill of every gate scores nothing", async () => {
+    const { root } = await seeded();
+    const before = await snapshot(historyDir(root, key));
+    const announcement = await recordTarget({
+      ...seedInput(root),
+      outDir: join(root, "out2"),
+      plan: plan({ backfill: ["chs-a", "chs-b"], backfillGrid: range(-13, 0) }),
+      outputs: {
+        rows: [],
+        gates: [
+          record({ gate: "chs-a", iwls: "00001", reason: "IWLS refused the station's metadata" }),
+          record({
+            gate: "chs-b",
+            iwls: "00002",
+            failures: range(-13, 0).map((grid) => ({ grid, reason: "IWLS served 0 samples" })),
+          }),
+        ],
+      },
+      tags: [SEED_TAG],
+    });
+    expect(await snapshot(historyDir(root, key))).toEqual(before);
+    expect((await readHistory(root, key)).map((p) => p.grid)).toEqual(range(-13, 0));
+    expect(announcement.releases).toEqual([]);
+    expect(announcement.issues.map((i) => i.title)).toEqual([
+      "Backfill of chs-a failed",
+      "Backfill of chs-b failed",
+    ]);
   });
 
   test("refuses rows from another stamp", async () => {

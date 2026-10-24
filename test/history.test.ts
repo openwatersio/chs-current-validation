@@ -78,6 +78,14 @@ describe("the history", () => {
     await expect(readHistory(root, key)).rejects.toThrow(/skips from grid point -2 to 0/);
   });
 
+  test("refuses to write a grid point with no rows, which it could not read back", async () => {
+    const root = await temp();
+    await expect(
+      writeGridPoint(root, key, { grid: 0, fitEnd: "2026-10-29", rows: [], gates: [record()] }),
+    ).rejects.toThrow(/grid point 0, the fit ending 2026-10-29, has no rows/);
+    expect(await readHistory(root, key)).toEqual([]);
+  });
+
   test("keeps no gates to backfill until told", async () => {
     const root = await temp();
     expect(await readState(root, key)).toEqual({ needs_backfill: [] });

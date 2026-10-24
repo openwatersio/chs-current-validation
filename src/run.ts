@@ -75,6 +75,13 @@ function sameFiles(a: GridPoint, b: GridPoint): boolean {
   return x.rows === y.rows && x.gates === y.gates;
 }
 
+/** A backfilled gate at a committed grid point where it scored no week. */
+interface Unscored {
+  fitEnd: string;
+  record: GateRecord;
+  rows: ResultRow[];
+}
+
 const noRowsReason = (g: GateRecord) =>
   g.reason ?? (g.failures ?? []).map((f) => f.reason).join("; ");
 
@@ -151,13 +158,17 @@ export async function recordTarget(input: {
   });
   const added: GridPoint[] = commit.map((p) => ({ ...p, fitEnd: p.rows[0].fit_end.slice(0, 10) }));
 
-  // Backfilled gates over grid points already committed.
+  // Backfilled gates over grid points already committed. A gate's committed
+  // rows give way only where its backfill scored a week, so a backfill that
+  // fails never loses evidence.
   const backfillGrid = new Set(backfill.size ? plan.backfillGrid : []);
   const owedBackfill = {
     gates: new Map([...backfill].map((id) => [id, FULL_WINDOWS])),
     offsets: plan.offsets,
   };
   const rescoredGrids = new Set<number>();
+  const replaced = new Set<string>();
+  const unscored = new Map<string, Unscored[]>();
   const updated = history.map((point) => {
     if (!backfillGrid.has(point.grid)) return point;
     const [fresh] = byGridPoint(
@@ -166,7 +177,23 @@ export async function recordTarget(input: {
       [point.grid],
     );
     checkComplete(fresh, owedBackfill);
-    const next = replaceGates(point, fresh, backfill);
+    const scoredHere = new Set(fresh.rows.filter((r) => r.status === "scored").map((r) => r.gate));
+    for (const id of backfill) {
+      if (scoredHere.has(id)) {
+        replaced.add(id);
+        continue;
+      }
+      unscored.set(id, [
+        ...(unscored.get(id) ?? []),
+        {
+          fitEnd: point.fitEnd,
+          // checkComplete has made sure every backfilled gate has a record here.
+          record: fresh.gates.find((g) => g.gate === id)!,
+          rows: fresh.rows.filter((r) => r.gate === id),
+        },
+      ]);
+    }
+    const next = replaceGates(point, fresh, scoredHere);
     // Count only changed points, so the same backfill recorded twice changes nothing.
     if (!sameFiles(next, point)) rescoredGrids.add(point.grid);
     return next;
@@ -177,9 +204,10 @@ export async function recordTarget(input: {
     latestRecords(history),
     outputs.gates.filter((g) => !backfill.has(g.gate)),
   );
+  // A flagged gate stays flagged until a backfill scores it at every grid point, so its disposition never pools two stations.
   const flagged = [
     ...new Set([
-      ...state.needs_backfill.filter((id) => !backfill.has(id)),
+      ...state.needs_backfill.filter((id) => !backfill.has(id) || unscored.has(id)),
       ...changes.map((c) => c.gate),
     ]),
   ].sort();
@@ -192,7 +220,7 @@ export async function recordTarget(input: {
 
   if (added.length) say(`committed fit ends ${added.map((p) => p.fitEnd).join(", ")}`);
   if (rescoredGrids.size)
-    say(`re-scored ${[...backfill].join(", ")} over ${rescoredGrids.size} grid points`);
+    say(`re-scored ${[...replaced].join(", ")} over ${rescoredGrids.size} grid points`);
   if (stopped) say(`grid point ${stopped.grid} waits: ${stopped.reason}`);
 
   // CHS's horizon moves on by itself; any other stop would hold the history back every month, unseen.
@@ -232,19 +260,23 @@ export async function recordTarget(input: {
       });
     }
   }
-  // A backfilled gate with no rows, such as a new gate with no IWLS station nearby, gets an issue too.
-  const backfilled = updated.filter((p) => backfillGrid.has(p.grid));
-  const newestBackfilled = backfilled.at(-1);
-  if (rescoredGrids.size && newestBackfilled) {
-    for (const g of newestBackfilled.gates) {
-      if (!backfill.has(g.gate)) continue;
-      if (backfilled.some((p) => p.rows.some((r) => r.gate === g.gate))) continue;
-      out.issues.push({
-        repo: input.repo,
-        title: `No rows for ${g.gate}`,
-        body: `A backfill re-scored \`${g.gate}\` over the fits ending ${backfilled[0].fitEnd} to ${newestBackfilled.fitEnd}, and it has no rows at any of them: ${noRowsReason(g)}.`,
-      });
-    }
+  // A backfilled gate with no scored week at a committed grid point, such as a new gate with no IWLS station nearby.
+  for (const [id, missed] of unscored) {
+    const newest = missed[missed.length - 1];
+    const reason = [
+      noRowsReason(newest.record),
+      newest.rows.length ? statusReason(newest.rows) : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+    const flagNote = flagged.includes(id)
+      ? " It stays flagged for a backfill, so its disposition carries over and the next run tries again."
+      : "";
+    out.issues.push({
+      repo: input.repo,
+      title: `Backfill of ${id} failed`,
+      body: `A backfill re-scored \`${id}\` but scored no week at the fits ending ${missed.map((m) => m.fitEnd).join(", ")}, so the history keeps what it had for it there.${flagNote} At the fit ending ${newest.fitEnd}: ${reason}.`,
+    });
   }
   for (const c of changes) {
     out.issues.push({
@@ -319,7 +351,7 @@ export async function recordTarget(input: {
     releaseNotes({
       doc,
       added: added.map((p) => p.fitEnd),
-      backfilled: rescoredGrids.size ? [...backfill] : [],
+      backfilled: rescoredGrids.size ? [...replaced] : [],
       ...(stopped ? { waiting: stopped.reason } : {}),
     }),
   );

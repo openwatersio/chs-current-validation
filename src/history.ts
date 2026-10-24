@@ -101,6 +101,12 @@ export async function writeGridPoint(
   key: HistoryKey,
   point: GridPoint,
 ): Promise<void> {
+  // readHistory takes a grid point's index from its rows, so a rowless file would stop every later run.
+  if (!point.rows.length) {
+    throw new Error(
+      `grid point ${point.grid}, the fit ending ${point.fitEnd}, has no rows to write`,
+    );
+  }
   const dir = historyDir(root, key);
   await mkdir(dir, { recursive: true });
   const files = gridPointFiles(point);
