@@ -207,9 +207,10 @@ export async function recordTarget(input: {
     ];
     out.issues.push({
       repo: input.repo,
-      title: `Grid point ${stopped.grid} can't commit`,
+      // Grid indices are shared across histories, so the issue names the one that stopped.
+      title: `Grid point ${stopped.grid} can't commit for ${plan.stamp.slice(0, 7)} scorer ${plan.scorer}`,
       body: [
-        `Grid point ${stopped.grid}${fitEnd ? `, the fit ending ${fitEnd},` : ""} can't commit: ${stopped.reason}. No later grid point commits until it does. Each run scores it again and comments here while it still can't.`,
+        `Grid point ${stopped.grid}${fitEnd ? `, the fit ending ${fitEnd},` : ""} can't commit for recipe stamp \`${plan.stamp}\`, scorer ${plan.scorer}: ${stopped.reason}. No later grid point in that history commits until it does. Each run scores it again and comments here while it still can't.`,
         ...(failures.length ? ["", `Gate failures recorded there: ${failures.join("; ")}.`] : []),
       ].join("\n"),
     });

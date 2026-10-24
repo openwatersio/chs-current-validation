@@ -312,12 +312,14 @@ describe("recordTarget", () => {
     expect(announcement.issues).toEqual([
       {
         repo: "openwatersio/chs-current-validation",
-        title: "Grid point 1 can't commit",
+        // Grid indices are shared across histories, so the title names which one stopped.
+        title: `Grid point 1 can't commit for ${STAMP.slice(0, 7)} scorer 2`,
         body: expect.stringContaining(
-          `Grid point 1, the fit ending ${testFitEnd(1)}, can't commit: no gate scored the 210-day +0 d week.`,
+          `Grid point 1, the fit ending ${testFitEnd(1)}, can't commit for recipe stamp \`${STAMP}\`, scorer 2: no gate scored the 210-day +0 d week.`,
         ),
       },
     ]);
+    expect(announcement.issues[0].body).toContain("No later grid point in that history commits");
     expect(announcement.issues[0].body).toContain(reason);
     expect((await readHistory(root, key)).at(-1)?.grid).toBe(0);
   });

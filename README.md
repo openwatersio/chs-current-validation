@@ -27,7 +27,7 @@ The rules follow the gate confidence design in [openwatersio/slackwater-ios#752]
 
 ## When releases pause
 
-A grid point commits only once CHS has published events through its last held-out week, which starts 270 days after its fit end. When that week falls in a year CHS hasn't published yet, the grid point waits until CHS publishes that year, and so does every grid point after it, because the history never skips one. Until then runs add no grid points, so releases pause unless a backfill re-scores a gate or a gate is flagged for one. The run's summary names the week it waits on, and the wait opens no issue. A grid point that stops for any other reason, such as IWLS refusing one window for every gate, opens a `Grid point <n> can't commit` issue here, and each run that still can't commit it comments there.
+A grid point commits only once CHS has published events through its last held-out week, which starts 270 days after its fit end. When that week falls in a year CHS hasn't published yet, the grid point waits until CHS publishes that year, and so does every grid point after it, because the history never skips one. Until then runs add no grid points, so releases pause unless a backfill re-scores a gate or a gate is flagged for one. The run's summary names the week it waits on, and the wait opens no issue. A grid point that stops for any other reason, such as IWLS refusing one window for every gate, opens a `Grid point <n> can't commit for <stamp> scorer <version>` issue here, naming the history that stopped because grid indices repeat across histories, and each run that still can't commit it comments there.
 
 ## New histories
 
@@ -47,7 +47,7 @@ Rows from different recipe stamps or scorer versions never pool, so each pair ha
 
 ## Recovering a failed announce
 
-The record job uploads `out/` as the `announce` artifact before it pushes. If publishing fails after the push, download that artifact into `out/` in a checkout of `main`, then run `npm ci && npm run announce` with `GH_TOKEN` and `DATABASE_ISSUES_TOKEN` set. Re-running announce from the artifact is safe: it skips a release that already exists and files the rest, so an issue it already opened gets a comment. Re-running the job or the workflow is not the recovery: the history is already on `main`, so record finds nothing new and announces nothing.
+The record job uploads `out/` as the `announce` artifact before it pushes. If publishing fails after the push, download that artifact into `out/` in a checkout of `main`, then run `npm ci && npm run announce` with `GH_TOKEN` and `DATABASE_ISSUES_TOKEN` set. Re-running announce from the artifact is safe: it skips a release that already exists and files the rest, so an issue it already opened gets a comment. It also dispatches the follow-up run again, which is harmless because the follow-up plans only what is still due. Re-running the job or the workflow is not the recovery: the history is already on `main`, so record finds nothing new and announces nothing.
 
 ## Licence and data
 
