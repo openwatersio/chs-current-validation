@@ -100,7 +100,7 @@ export function requestedBackfill(input: string, fitted: readonly GateInput[]): 
   const unknown = ids.filter((id) => !known.has(id));
   if (unknown.length) {
     throw new Error(
-      `the backfill input names ${unknown.join(", ")}, which aren't fitted CHS current gates`,
+      `the backfill input names gates that aren't fitted CHS current gates: ${unknown.join(", ")}`,
     );
   }
   return ids;

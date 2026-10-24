@@ -141,7 +141,7 @@ describe("requestedBackfill", () => {
 
   test("throws on an id that isn't a fitted gate, naming each", () => {
     expect(() => requestedBackfill("chs-gate-01,chs-gate-1, chs-gaet-02", gates(3))).toThrow(
-      "the backfill input names chs-gate-1, chs-gaet-02, which aren't fitted CHS current gates",
+      "the backfill input names gates that aren't fitted CHS current gates: chs-gate-1, chs-gaet-02",
     );
   });
 });
