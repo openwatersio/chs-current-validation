@@ -1,0 +1,3604 @@
+{
+  "release": "fit-2026-10-22-8f85912-r2",
+  "stamp": "8f85912ce223",
+  "engine": "b9beff5b7ba7d42296cbff3b92e9976e6846f402",
+  "scorer": 4,
+  "database": "1.0.0-beta.20261017",
+  "newest": {
+    "grid": -1,
+    "fit_end": "2026-10-22"
+  },
+  "pooled": [
+    "2025-11-20",
+    "2025-11-27",
+    "2026-01-01",
+    "2026-02-05",
+    "2026-03-12",
+    "2026-03-19",
+    "2026-04-23",
+    "2026-05-28",
+    "2026-07-02",
+    "2026-07-09",
+    "2026-08-13",
+    "2026-09-17",
+    "2026-10-22"
+  ],
+  "gates": {
+    "chs-active-pass": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "final",
+        "days": 60
+      },
+      "measured": {
+        "tier": "final",
+        "days": 60
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 14.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 399,
+              "extrema": 393,
+              "slack_median_min": 2,
+              "extremum_median_min": 1.3,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 458,
+              "extrema": 447,
+              "slack_median_min": 2.1,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 442,
+              "slack_median_min": 2.2,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 430,
+              "extrema": 419,
+              "slack_median_min": 2.3,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 14.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 399,
+              "extrema": 393,
+              "slack_median_min": 1.8,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 458,
+              "extrema": 447,
+              "slack_median_min": 1.8,
+              "extremum_median_min": 0.9,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 442,
+              "slack_median_min": 1.9,
+              "extremum_median_min": 1.05,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 430,
+              "extrema": 419,
+              "slack_median_min": 1.9,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 12.7,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 399,
+              "extrema": 393,
+              "slack_median_min": 1.7,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 458,
+              "extrema": 447,
+              "slack_median_min": 1.8,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 442,
+              "slack_median_min": 1.8,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 430,
+              "extrema": 419,
+              "slack_median_min": 1.9,
+              "extremum_median_min": 1,
+              "speed_median_kn": 0.05
+            }
+          ]
+        }
+      }
+    },
+    "chs-arran-rapids": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 47.4
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 47.4
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 48.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 5.1,
+              "extremum_median_min": 16.1,
+              "speed_median_kn": 0.55
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 17.75,
+              "speed_median_kn": 0.55
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 6.2,
+              "extremum_median_min": 18.05,
+              "speed_median_kn": 0.625
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5.2,
+              "extremum_median_min": 17.2,
+              "speed_median_kn": 0.51
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 47.4,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 4,
+              "extremum_median_min": 15.6,
+              "speed_median_kn": 0.47
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 3.8,
+              "extremum_median_min": 17.25,
+              "speed_median_kn": 0.49
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.8,
+              "extremum_median_min": 16.65,
+              "speed_median_kn": 0.57
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 4.4,
+              "extremum_median_min": 15.5,
+              "speed_median_kn": 0.45
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 46.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 3.8,
+              "extremum_median_min": 15.8,
+              "speed_median_kn": 0.48
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 3.6,
+              "extremum_median_min": 17.25,
+              "speed_median_kn": 0.51
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.3,
+              "extremum_median_min": 16.8,
+              "speed_median_kn": 0.55
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 15.4,
+              "speed_median_kn": 0.41
+            }
+          ]
+        }
+      }
+    },
+    "chs-beazley-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 44.5,
+          "near_bar": true
+        }
+      },
+      "measured": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 45
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 42.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 6,
+              "extremum_median_min": 18.15,
+              "speed_median_kn": 0.43
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 6.55,
+              "extremum_median_min": 19.8,
+              "speed_median_kn": 0.45
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 6.3,
+              "extremum_median_min": 20.8,
+              "speed_median_kn": 0.49
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 6.1,
+              "extremum_median_min": 19.9,
+              "speed_median_kn": 0.42
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 44.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 4.3,
+              "extremum_median_min": 17.25,
+              "speed_median_kn": 0.39
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 4,
+              "extremum_median_min": 18.8,
+              "speed_median_kn": 0.4
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.3,
+              "extremum_median_min": 19.4,
+              "speed_median_kn": 0.43
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 17.9,
+              "speed_median_kn": 0.43
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 44.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 17.45,
+              "speed_median_kn": 0.405
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 3.7,
+              "extremum_median_min": 19,
+              "speed_median_kn": 0.41
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4,
+              "extremum_median_min": 19.4,
+              "speed_median_kn": 0.42
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 4.45,
+              "extremum_median_min": 18,
+              "speed_median_kn": 0.39
+            }
+          ]
+        }
+      }
+    },
+    "chs-blackney-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 45
+      },
+      "measured": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 45
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 6,
+          "wrong_sign_share": 0.04,
+          "worst_slack_min": 62.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 374,
+              "extrema": 376,
+              "slack_median_min": 7.15,
+              "extremum_median_min": 11.75,
+              "speed_median_kn": 0.12
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 440,
+              "extrema": 426,
+              "slack_median_min": 7.8,
+              "extremum_median_min": 11.95,
+              "speed_median_kn": 0.13
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 410,
+              "extrema": 414,
+              "slack_median_min": 7.3,
+              "extremum_median_min": 12.1,
+              "speed_median_kn": 0.11
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 403,
+              "extrema": 400,
+              "slack_median_min": 6.5,
+              "extremum_median_min": 10.4,
+              "speed_median_kn": 0.12
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 43,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 374,
+              "extrema": 376,
+              "slack_median_min": 5.85,
+              "extremum_median_min": 11.149999999999999,
+              "speed_median_kn": 0.09
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 440,
+              "extrema": 426,
+              "slack_median_min": 6.05,
+              "extremum_median_min": 10.9,
+              "speed_median_kn": 0.1
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 410,
+              "extrema": 414,
+              "slack_median_min": 5.8,
+              "extremum_median_min": 11.05,
+              "speed_median_kn": 0.1
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 403,
+              "extrema": 400,
+              "slack_median_min": 5.6,
+              "extremum_median_min": 9.95,
+              "speed_median_kn": 0.11
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 42.4,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 374,
+              "extrema": 376,
+              "slack_median_min": 5.75,
+              "extremum_median_min": 10.9,
+              "speed_median_kn": 0.09
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 440,
+              "extrema": 426,
+              "slack_median_min": 6,
+              "extremum_median_min": 10.95,
+              "speed_median_kn": 0.1
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 410,
+              "extrema": 414,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 10.95,
+              "speed_median_kn": 0.1
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 403,
+              "extrema": 400,
+              "slack_median_min": 5.5,
+              "extremum_median_min": 9.850000000000001,
+              "speed_median_kn": 0.10500000000000001
+            }
+          ]
+        }
+      }
+    },
+    "chs-dent-rapids": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 51.9
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 51.9
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 47.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 407,
+              "extrema": 406,
+              "slack_median_min": 5.4,
+              "extremum_median_min": 27.4,
+              "speed_median_kn": 0.48
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 18,
+              "speed_median_kn": 0.36
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 5.8,
+              "extremum_median_min": 22.75,
+              "speed_median_kn": 0.43
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 434,
+              "slack_median_min": 5.6,
+              "extremum_median_min": 20.65,
+              "speed_median_kn": 0.46
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 51.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 407,
+              "extrema": 406,
+              "slack_median_min": 5,
+              "extremum_median_min": 24.35,
+              "speed_median_kn": 0.44
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 3.6,
+              "extremum_median_min": 16.7,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.4,
+              "extremum_median_min": 23.35,
+              "speed_median_kn": 0.34
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 434,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 17.2,
+              "speed_median_kn": 0.35
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 50.7,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 407,
+              "extrema": 406,
+              "slack_median_min": 4.6,
+              "extremum_median_min": 24,
+              "speed_median_kn": 0.43
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 3.3,
+              "extremum_median_min": 16.5,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 23.65,
+              "speed_median_kn": 0.325
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 434,
+              "slack_median_min": 4.15,
+              "extremum_median_min": 17.3,
+              "speed_median_kn": 0.36
+            }
+          ]
+        }
+      }
+    },
+    "chs-dodd-narrows": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 49.3
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 49.3
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 49.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 6.3,
+              "extremum_median_min": 10,
+              "speed_median_kn": 0.31
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 6,
+              "extremum_median_min": 12,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 5.85,
+              "extremum_median_min": 11.850000000000001,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 6.7,
+              "extremum_median_min": 10.9,
+              "speed_median_kn": 0.29
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 49.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 9.75,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 3.7,
+              "extremum_median_min": 10.149999999999999,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 4.6,
+              "extremum_median_min": 10.25,
+              "speed_median_kn": 0.24
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5.1,
+              "extremum_median_min": 11,
+              "speed_median_kn": 0.23
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 51.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 406,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 9.8,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 3.6,
+              "extremum_median_min": 10.2,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 10.45,
+              "speed_median_kn": 0.235
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 10.6,
+              "speed_median_kn": 0.23
+            }
+          ]
+        }
+      }
+    },
+    "chs-first-narrows": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "final",
+        "days": 60
+      },
+      "measured": {
+        "tier": "final",
+        "days": 60
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 23.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 398,
+              "extrema": 377,
+              "slack_median_min": 2.9,
+              "extremum_median_min": 1.6,
+              "speed_median_kn": 0.07
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 447,
+              "extrema": 422,
+              "slack_median_min": 2.8,
+              "extremum_median_min": 1.6,
+              "speed_median_kn": 0.07
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 450,
+              "extrema": 422,
+              "slack_median_min": 3.1,
+              "extremum_median_min": 1.8,
+              "speed_median_kn": 0.07
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 414,
+              "extrema": 395,
+              "slack_median_min": 3,
+              "extremum_median_min": 1.7,
+              "speed_median_kn": 0.07
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 21.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 398,
+              "extrema": 377,
+              "slack_median_min": 2.5,
+              "extremum_median_min": 1.3,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 447,
+              "extrema": 422,
+              "slack_median_min": 2.5,
+              "extremum_median_min": 1.3,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 450,
+              "extrema": 422,
+              "slack_median_min": 2.7,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 414,
+              "extrema": 395,
+              "slack_median_min": 2.8,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 18,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 398,
+              "extrema": 377,
+              "slack_median_min": 2.4,
+              "extremum_median_min": 1.2,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 447,
+              "extrema": 422,
+              "slack_median_min": 2.5,
+              "extremum_median_min": 1.3,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 450,
+              "extrema": 422,
+              "slack_median_min": 2.8,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 414,
+              "extrema": 395,
+              "slack_median_min": 2.75,
+              "extremum_median_min": 1.4,
+              "speed_median_kn": 0.06
+            }
+          ]
+        }
+      }
+    },
+    "chs-gabriola-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 2
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 2
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 2,
+          "wrong_sign_share": 0.037037037037037035,
+          "worst_slack_min": 124.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 10.8,
+              "extremum_median_min": 17.5,
+              "speed_median_kn": 0.53
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 15.3,
+              "extremum_median_min": 16.4,
+              "speed_median_kn": 0.59
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 457,
+              "slack_median_min": 16.2,
+              "extremum_median_min": 21.7,
+              "speed_median_kn": 0.5
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 430,
+              "extrema": 428,
+              "slack_median_min": 17.15,
+              "extremum_median_min": 21.5,
+              "speed_median_kn": 0.68
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 1,
+          "invented": 2,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 68.6,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 9.4,
+              "extremum_median_min": 15.4,
+              "speed_median_kn": 0.35
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 11,
+              "extremum_median_min": 13.45,
+              "speed_median_kn": 0.24
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 457,
+              "slack_median_min": 11.350000000000001,
+              "extremum_median_min": 13.7,
+              "speed_median_kn": 0.28
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 430,
+              "extrema": 428,
+              "slack_median_min": 10.7,
+              "extremum_median_min": 14.350000000000001,
+              "speed_median_kn": 0.415
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 1,
+          "invented": 2,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 65.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 8,
+              "extremum_median_min": 12.8,
+              "speed_median_kn": 0.33
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 462,
+              "slack_median_min": 10.5,
+              "extremum_median_min": 12.8,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 457,
+              "slack_median_min": 10.5,
+              "extremum_median_min": 13.9,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 429,
+              "extrema": 428,
+              "slack_median_min": 8.6,
+              "extremum_median_min": 12.149999999999999,
+              "speed_median_kn": 0.395
+            }
+          ]
+        }
+      }
+    },
+    "chs-gillard-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 40
+      },
+      "measured": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 40
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 46.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 12,
+              "speed_median_kn": 0.37
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 5.6,
+              "extremum_median_min": 12.4,
+              "speed_median_kn": 0.38
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 13.4,
+              "speed_median_kn": 0.44
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 4.95,
+              "extremum_median_min": 12.5,
+              "speed_median_kn": 0.36
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 36.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 3.7,
+              "extremum_median_min": 11.3,
+              "speed_median_kn": 0.32
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 3.3,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.33
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 3.8,
+              "extremum_median_min": 11.75,
+              "speed_median_kn": 0.38
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 3.5,
+              "extremum_median_min": 10.6,
+              "speed_median_kn": 0.29
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 36.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 3.5,
+              "extremum_median_min": 11.5,
+              "speed_median_kn": 0.33
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 461,
+              "slack_median_min": 3.1,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.34
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 3.5,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.36
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 3.45,
+              "extremum_median_min": 10.8,
+              "speed_median_kn": 0.27
+            }
+          ]
+        }
+      }
+    },
+    "chs-great-bras-dor": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 70.8
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 70.8
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 103.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 400,
+              "slack_median_min": 8.7,
+              "extremum_median_min": 14.3,
+              "speed_median_kn": 0.19
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 458,
+              "slack_median_min": 7.9,
+              "extremum_median_min": 13.2,
+              "speed_median_kn": 0.23
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 464,
+              "extrema": 448,
+              "slack_median_min": 7.2,
+              "extremum_median_min": 12,
+              "speed_median_kn": 0.195
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 8.3,
+              "extremum_median_min": 12,
+              "speed_median_kn": 0.25
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 70.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 400,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 11.45,
+              "speed_median_kn": 0.15
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 458,
+              "slack_median_min": 5.6,
+              "extremum_median_min": 10.8,
+              "speed_median_kn": 0.18
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 464,
+              "extrema": 448,
+              "slack_median_min": 5.9,
+              "extremum_median_min": 10.95,
+              "speed_median_kn": 0.14
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 6.3,
+              "extremum_median_min": 10.3,
+              "speed_median_kn": 0.18
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 70.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 400,
+              "slack_median_min": 5.95,
+              "extremum_median_min": 11.7,
+              "speed_median_kn": 0.15
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 458,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 10.75,
+              "speed_median_kn": 0.18
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 464,
+              "extrema": 448,
+              "slack_median_min": 5.9,
+              "extremum_median_min": 10.7,
+              "speed_median_kn": 0.14
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 6.4,
+              "extremum_median_min": 10.4,
+              "speed_median_kn": 0.17
+            }
+          ]
+        }
+      }
+    },
+    "chs-hole-in-the-wall": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 45.3
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 45.3
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 41.4,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 6.2,
+              "extremum_median_min": 18.5,
+              "speed_median_kn": 0.5
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 6.4,
+              "extremum_median_min": 21.6,
+              "speed_median_kn": 0.46
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 5.8,
+              "extremum_median_min": 20.6,
+              "speed_median_kn": 0.475
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 5.95,
+              "extremum_median_min": 20.3,
+              "speed_median_kn": 0.41
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 45.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 18.2,
+              "speed_median_kn": 0.41
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 4,
+              "extremum_median_min": 20.5,
+              "speed_median_kn": 0.4
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 19.7,
+              "speed_median_kn": 0.42
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 18.4,
+              "speed_median_kn": 0.4
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 44.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 18.3,
+              "speed_median_kn": 0.42
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 3.9,
+              "extremum_median_min": 20.4,
+              "speed_median_kn": 0.4
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 4.2,
+              "extremum_median_min": 19.55,
+              "speed_median_kn": 0.41
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 434,
+              "extrema": 433,
+              "slack_median_min": 4.75,
+              "extremum_median_min": 18.3,
+              "speed_median_kn": 0.38
+            }
+          ]
+        }
+      }
+    },
+    "chs-johnstone-strait-central": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "final",
+        "days": 210,
+        "provisional_slack_minutes": 35
+      },
+      "measured": {
+        "tier": "final",
+        "days": 210,
+        "provisional_slack_minutes": 35
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 30.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 89,
+              "extrema": 171,
+              "slack_median_min": 6.4,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 66,
+              "extrema": 213,
+              "slack_median_min": 4.5,
+              "extremum_median_min": 11.6,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 70,
+              "extrema": 187,
+              "slack_median_min": 8.95,
+              "extremum_median_min": 10.2,
+              "speed_median_kn": 0.05
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 69,
+              "extrema": 198,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 9.3,
+              "speed_median_kn": 0.04
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 21,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 89,
+              "extrema": 171,
+              "slack_median_min": 7.1,
+              "extremum_median_min": 11.9,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 66,
+              "extrema": 213,
+              "slack_median_min": 4.85,
+              "extremum_median_min": 9.2,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 70,
+              "extrema": 187,
+              "slack_median_min": 7.7,
+              "extremum_median_min": 10.8,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 69,
+              "extrema": 198,
+              "slack_median_min": 5,
+              "extremum_median_min": 7.85,
+              "speed_median_kn": 0.04
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 21.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 89,
+              "extrema": 171,
+              "slack_median_min": 6.7,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 66,
+              "extrema": 213,
+              "slack_median_min": 4.7,
+              "extremum_median_min": 9.1,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 70,
+              "extrema": 187,
+              "slack_median_min": 7.7,
+              "extremum_median_min": 10.9,
+              "speed_median_kn": 0.04
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 69,
+              "extrema": 198,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 8.1,
+              "speed_median_kn": 0.04
+            }
+          ]
+        }
+      }
+    },
+    "chs-juan-de-fuca-east": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 24
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 24
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 31,
+          "invented": 85,
+          "wrong_sign_share": 0.19230769230769232,
+          "worst_slack_min": 175.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 320,
+              "extrema": 324,
+              "slack_median_min": 18.95,
+              "extremum_median_min": 13.600000000000001,
+              "speed_median_kn": 0.26
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 283,
+              "extrema": 361,
+              "slack_median_min": 21.5,
+              "extremum_median_min": 16.8,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 321,
+              "extrema": 368,
+              "slack_median_min": 17.3,
+              "extremum_median_min": 17.25,
+              "speed_median_kn": 0.23
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 298,
+              "extrema": 331,
+              "slack_median_min": 23.65,
+              "extremum_median_min": 18.2,
+              "speed_median_kn": 0.34
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 9,
+          "invented": 24,
+          "wrong_sign_share": 0.09090909090909091,
+          "worst_slack_min": 147.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 324,
+              "extrema": 324,
+              "slack_median_min": 12.4,
+              "extremum_median_min": 9.45,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 285,
+              "extrema": 361,
+              "slack_median_min": 19.2,
+              "extremum_median_min": 12.1,
+              "speed_median_kn": 0.24
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 330,
+              "extrema": 369,
+              "slack_median_min": 10.6,
+              "extremum_median_min": 15.2,
+              "speed_median_kn": 0.17
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 305,
+              "extrema": 332,
+              "slack_median_min": 15.4,
+              "extremum_median_min": 20.95,
+              "speed_median_kn": 0.27
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 8,
+          "invented": 14,
+          "wrong_sign_share": 0.09090909090909091,
+          "worst_slack_min": 94.7,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 324,
+              "extrema": 324,
+              "slack_median_min": 10.149999999999999,
+              "extremum_median_min": 9.649999999999999,
+              "speed_median_kn": 0.22
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 285,
+              "extrema": 361,
+              "slack_median_min": 16.7,
+              "extremum_median_min": 10.4,
+              "speed_median_kn": 0.22
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 330,
+              "extrema": 369,
+              "slack_median_min": 9.6,
+              "extremum_median_min": 13.7,
+              "speed_median_kn": 0.15
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 306,
+              "extrema": 332,
+              "slack_median_min": 15.850000000000001,
+              "extremum_median_min": 19.5,
+              "speed_median_kn": 0.23
+            }
+          ]
+        }
+      }
+    },
+    "chs-masset-sound": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 47.3
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 47.3
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 57.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 408,
+              "slack_median_min": 8.4,
+              "extremum_median_min": 24.25,
+              "speed_median_kn": 0.325
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 8.2,
+              "extremum_median_min": 20.2,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 460,
+              "slack_median_min": 7.3,
+              "extremum_median_min": 23.1,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 8.25,
+              "extremum_median_min": 19.7,
+              "speed_median_kn": 0.24
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 47.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 408,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 22.2,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 7.6,
+              "extremum_median_min": 19.5,
+              "speed_median_kn": 0.26
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 460,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 21.2,
+              "speed_median_kn": 0.23
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 18.7,
+              "speed_median_kn": 0.21
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 46.6,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 408,
+              "slack_median_min": 7.3,
+              "extremum_median_min": 22.5,
+              "speed_median_kn": 0.26
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 461,
+              "slack_median_min": 7.8,
+              "extremum_median_min": 19.4,
+              "speed_median_kn": 0.26
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 460,
+              "slack_median_min": 7.5,
+              "extremum_median_min": 21.1,
+              "speed_median_kn": 0.23
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 431,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 18.7,
+              "speed_median_kn": 0.2
+            }
+          ]
+        }
+      }
+    },
+    "chs-nakwakto-rapids": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 49.8
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 49.8
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 63.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 8.3,
+              "extremum_median_min": 10.6,
+              "speed_median_kn": 0.6
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 462,
+              "slack_median_min": 7.5,
+              "extremum_median_min": 11.6,
+              "speed_median_kn": 0.63
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 8.1,
+              "extremum_median_min": 12.45,
+              "speed_median_kn": 0.615
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 432,
+              "slack_median_min": 6.75,
+              "extremum_median_min": 11,
+              "speed_median_kn": 0.59
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 49.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 7.25,
+              "extremum_median_min": 9.1,
+              "speed_median_kn": 0.57
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 462,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 10.350000000000001,
+              "speed_median_kn": 0.475
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 6.6,
+              "extremum_median_min": 10.4,
+              "speed_median_kn": 0.58
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 432,
+              "slack_median_min": 7,
+              "extremum_median_min": 10,
+              "speed_median_kn": 0.48
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 49.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 9.3,
+              "speed_median_kn": 0.56
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 462,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 10.3,
+              "speed_median_kn": 0.48
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 460,
+              "slack_median_min": 6.35,
+              "extremum_median_min": 10.6,
+              "speed_median_kn": 0.565
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 432,
+              "slack_median_min": 6.9,
+              "extremum_median_min": 10,
+              "speed_median_kn": 0.475
+            }
+          ]
+        }
+      }
+    },
+    "chs-porlier-pass": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 53.7
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 53.7
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 59.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 7.2,
+              "extremum_median_min": 11.7,
+              "speed_median_kn": 0.38
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 462,
+              "slack_median_min": 7.1,
+              "extremum_median_min": 11.8,
+              "speed_median_kn": 0.34
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 6.5,
+              "extremum_median_min": 13.2,
+              "speed_median_kn": 0.32
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 7.3,
+              "extremum_median_min": 10.5,
+              "speed_median_kn": 0.31
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 53.7,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 4.7,
+              "extremum_median_min": 11.7,
+              "speed_median_kn": 0.34
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 462,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 9.7,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 5.2,
+              "extremum_median_min": 11.3,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5.3,
+              "extremum_median_min": 10.4,
+              "speed_median_kn": 0.23
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 50.6,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 5.2,
+              "extremum_median_min": 11.7,
+              "speed_median_kn": 0.35
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 462,
+              "slack_median_min": 5.05,
+              "extremum_median_min": 9.9,
+              "speed_median_kn": 0.26
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 460,
+              "slack_median_min": 5.3,
+              "extremum_median_min": 11.2,
+              "speed_median_kn": 0.28
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5.3,
+              "extremum_median_min": 9.5,
+              "speed_median_kn": 0.24
+            }
+          ]
+        }
+      }
+    },
+    "chs-quatsino-narrows": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 40
+      },
+      "measured": {
+        "tier": "bounded",
+        "days": 210,
+        "slack_bound_minutes": 40
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0.037037037037037035,
+          "worst_slack_min": 171.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 7.1,
+              "extremum_median_min": 13.6,
+              "speed_median_kn": 0.33
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 459,
+              "slack_median_min": 6.9,
+              "extremum_median_min": 17.4,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 459,
+              "slack_median_min": 6.2,
+              "extremum_median_min": 18.6,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 6.5,
+              "extremum_median_min": 15.8,
+              "speed_median_kn": 0.3
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 38,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 5.55,
+              "extremum_median_min": 13.4,
+              "speed_median_kn": 0.28
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 459,
+              "slack_median_min": 4.6,
+              "extremum_median_min": 16.1,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 459,
+              "slack_median_min": 4.6,
+              "extremum_median_min": 15.8,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5.1,
+              "extremum_median_min": 16.4,
+              "speed_median_kn": 0.26
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 40.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 406,
+              "extrema": 407,
+              "slack_median_min": 5.45,
+              "extremum_median_min": 13.3,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 459,
+              "slack_median_min": 4.4,
+              "extremum_median_min": 16.4,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 459,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 15.8,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 433,
+              "extrema": 433,
+              "slack_median_min": 5,
+              "extremum_median_min": 16.4,
+              "speed_median_kn": 0.26
+            }
+          ]
+        }
+      }
+    },
+    "chs-race-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 16
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 16
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 26,
+          "invented": 25,
+          "wrong_sign_share": 0.10714285714285714,
+          "worst_slack_min": 104.4,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 364,
+              "extrema": 384,
+              "slack_median_min": 7.25,
+              "extremum_median_min": 14.95,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 384,
+              "extrema": 424,
+              "slack_median_min": 7.7,
+              "extremum_median_min": 12.8,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 390,
+              "extrema": 410,
+              "slack_median_min": 8.5,
+              "extremum_median_min": 18.75,
+              "speed_median_kn": 0.36
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 375,
+              "extrema": 406,
+              "slack_median_min": 9.3,
+              "extremum_median_min": 16.95,
+              "speed_median_kn": 0.33
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 10,
+          "invented": 16,
+          "wrong_sign_share": 0.08,
+          "worst_slack_min": 55.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 376,
+              "extrema": 386,
+              "slack_median_min": 7.4,
+              "extremum_median_min": 13.55,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 386,
+              "extrema": 424,
+              "slack_median_min": 6.65,
+              "extremum_median_min": 10.8,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 390,
+              "extrema": 410,
+              "slack_median_min": 6.3,
+              "extremum_median_min": 16.9,
+              "speed_median_kn": 0.31
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 377,
+              "extrema": 405,
+              "slack_median_min": 8,
+              "extremum_median_min": 13.7,
+              "speed_median_kn": 0.27
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 12,
+          "invented": 10,
+          "wrong_sign_share": 0.08,
+          "worst_slack_min": 58.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 376,
+              "extrema": 386,
+              "slack_median_min": 6.6,
+              "extremum_median_min": 13.4,
+              "speed_median_kn": 0.2
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 382,
+              "extrema": 424,
+              "slack_median_min": 6.25,
+              "extremum_median_min": 10.6,
+              "speed_median_kn": 0.245
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 390,
+              "extrema": 410,
+              "slack_median_min": 5.75,
+              "extremum_median_min": 16.85,
+              "speed_median_kn": 0.31
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 379,
+              "extrema": 406,
+              "slack_median_min": 6.9,
+              "extremum_median_min": 13.3,
+              "speed_median_kn": 0.265
+            }
+          ]
+        }
+      }
+    },
+    "chs-sechelt-rapids": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 16
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 16
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 45,
+          "invented": 19,
+          "wrong_sign_share": 0.14814814814814814,
+          "worst_slack_min": 126.7,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 393,
+              "extrema": 397,
+              "slack_median_min": 15.5,
+              "extremum_median_min": 21.3,
+              "speed_median_kn": 0.89
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 455,
+              "extrema": 455,
+              "slack_median_min": 20.6,
+              "extremum_median_min": 24.8,
+              "speed_median_kn": 0.92
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 430,
+              "extrema": 445,
+              "slack_median_min": 15.649999999999999,
+              "extremum_median_min": 19.7,
+              "speed_median_kn": 0.99
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 413,
+              "extrema": 420,
+              "slack_median_min": 18.5,
+              "extremum_median_min": 24.85,
+              "speed_median_kn": 0.995
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 36,
+          "invented": 16,
+          "wrong_sign_share": 0.11538461538461539,
+          "worst_slack_min": 124.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 390,
+              "extrema": 395,
+              "slack_median_min": 13.149999999999999,
+              "extremum_median_min": 20,
+              "speed_median_kn": 0.73
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 457,
+              "extrema": 456,
+              "slack_median_min": 17.6,
+              "extremum_median_min": 21.9,
+              "speed_median_kn": 0.915
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 438,
+              "extrema": 450,
+              "slack_median_min": 11.45,
+              "extremum_median_min": 16.55,
+              "speed_median_kn": 0.89
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 415,
+              "extrema": 421,
+              "slack_median_min": 15.3,
+              "extremum_median_min": 22.2,
+              "speed_median_kn": 0.88
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 36,
+          "invented": 16,
+          "wrong_sign_share": 0.11538461538461539,
+          "worst_slack_min": 129.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 390,
+              "extrema": 395,
+              "slack_median_min": 12.7,
+              "extremum_median_min": 18.8,
+              "speed_median_kn": 0.69
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 457,
+              "extrema": 456,
+              "slack_median_min": 16.7,
+              "extremum_median_min": 21.05,
+              "speed_median_kn": 0.89
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 438,
+              "extrema": 449,
+              "slack_median_min": 10.5,
+              "extremum_median_min": 16.1,
+              "speed_median_kn": 0.86
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 415,
+              "extrema": 420,
+              "slack_median_min": 14.4,
+              "extremum_median_min": 21.35,
+              "speed_median_kn": 0.85
+            }
+          ]
+        }
+      }
+    },
+    "chs-second-narrows": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 2
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 2
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 2,
+          "invented": 12,
+          "wrong_sign_share": 0.07407407407407407,
+          "worst_slack_min": 116.8,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 397,
+              "slack_median_min": 10.5,
+              "extremum_median_min": 16.6,
+              "speed_median_kn": 0.25
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 453,
+              "extrema": 450,
+              "slack_median_min": 10.1,
+              "extremum_median_min": 21.799999999999997,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 461,
+              "extrema": 445,
+              "slack_median_min": 9.7,
+              "extremum_median_min": 20.5,
+              "speed_median_kn": 0.3
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 421,
+              "extrema": 418,
+              "slack_median_min": 10.8,
+              "extremum_median_min": 19.4,
+              "speed_median_kn": 0.23
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 2,
+          "wrong_sign_share": 0.037037037037037035,
+          "worst_slack_min": 80.6,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 397,
+              "slack_median_min": 6.85,
+              "extremum_median_min": 15.4,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 453,
+              "extrema": 450,
+              "slack_median_min": 9.6,
+              "extremum_median_min": 19.1,
+              "speed_median_kn": 0.18
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 463,
+              "extrema": 445,
+              "slack_median_min": 7.2,
+              "extremum_median_min": 17,
+              "speed_median_kn": 0.24
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 421,
+              "extrema": 418,
+              "slack_median_min": 8.6,
+              "extremum_median_min": 19.7,
+              "speed_median_kn": 0.21
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 2,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 80.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 404,
+              "extrema": 397,
+              "slack_median_min": 6.6,
+              "extremum_median_min": 15.3,
+              "speed_median_kn": 0.21
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 453,
+              "extrema": 450,
+              "slack_median_min": 9.4,
+              "extremum_median_min": 19.5,
+              "speed_median_kn": 0.18
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 463,
+              "extrema": 445,
+              "slack_median_min": 6.9,
+              "extremum_median_min": 16.9,
+              "speed_median_kn": 0.24
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 421,
+              "extrema": 418,
+              "slack_median_min": 8.6,
+              "extremum_median_min": 19.25,
+              "speed_median_kn": 0.21
+            }
+          ]
+        }
+      }
+    },
+    "chs-seymour-narrows": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "final",
+        "days": 60
+      },
+      "measured": {
+        "tier": "final",
+        "days": 60
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 1.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 459,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 457,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 433,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 1.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 459,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 457,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 433,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 1.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 405,
+              "extrema": 407,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 459,
+              "extrema": 459,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 460,
+              "extrema": 457,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 432,
+              "extrema": 433,
+              "slack_median_min": 0.3,
+              "extremum_median_min": 0.3,
+              "speed_median_kn": 0.01
+            }
+          ]
+        }
+      }
+    },
+    "chs-tillicum-bridge": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 42
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "invented_slack",
+          "value": 42
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 37,
+          "invented": 58,
+          "wrong_sign_share": 0.16666666666666666,
+          "worst_slack_min": 177.2,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 261,
+              "extrema": 286,
+              "slack_median_min": 16.9,
+              "extremum_median_min": 19.9,
+              "speed_median_kn": 0.395
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 250,
+              "extrema": 331,
+              "slack_median_min": 17.8,
+              "extremum_median_min": 28.1,
+              "speed_median_kn": 0.37
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 285,
+              "extrema": 326,
+              "slack_median_min": 24.7,
+              "extremum_median_min": 21.25,
+              "speed_median_kn": 0.36
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 244,
+              "extrema": 320,
+              "slack_median_min": 24.700000000000003,
+              "extremum_median_min": 27.75,
+              "speed_median_kn": 0.43
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 21,
+          "invented": 42,
+          "wrong_sign_share": 0.2,
+          "worst_slack_min": 153.9,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 271,
+              "extrema": 303,
+              "slack_median_min": 15.7,
+              "extremum_median_min": 18.2,
+              "speed_median_kn": 0.36
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 253,
+              "extrema": 332,
+              "slack_median_min": 14,
+              "extremum_median_min": 24.5,
+              "speed_median_kn": 0.33
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 288,
+              "extrema": 329,
+              "slack_median_min": 20.65,
+              "extremum_median_min": 19.5,
+              "speed_median_kn": 0.28
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 244,
+              "extrema": 325,
+              "slack_median_min": 18.65,
+              "extremum_median_min": 25.1,
+              "speed_median_kn": 0.25
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 24,
+          "invented": 41,
+          "wrong_sign_share": 0.13636363636363635,
+          "worst_slack_min": 145.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 270,
+              "extrema": 302,
+              "slack_median_min": 15.85,
+              "extremum_median_min": 18.35,
+              "speed_median_kn": 0.34
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 252,
+              "extrema": 331,
+              "slack_median_min": 11.2,
+              "extremum_median_min": 25.1,
+              "speed_median_kn": 0.29
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 287,
+              "extrema": 330,
+              "slack_median_min": 20.1,
+              "extremum_median_min": 19.4,
+              "speed_median_kn": 0.27
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 244,
+              "extrema": 326,
+              "slack_median_min": 19.8,
+              "extremum_median_min": 24.4,
+              "speed_median_kn": 0.24
+            }
+          ]
+        }
+      }
+    },
+    "chs-weynton-passage": {
+      "status": "fresh",
+      "chs_fit": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 45.3
+        }
+      },
+      "measured": {
+        "tier": "online",
+        "miss": {
+          "clause": "slack_worst",
+          "value": 45.3
+        }
+      },
+      "windows": {
+        "60": {
+          "days": 60,
+          "weeks": 65,
+          "missed": 2,
+          "invented": 0,
+          "wrong_sign_share": 0.037037037037037035,
+          "worst_slack_min": 91.5,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 398,
+              "extrema": 395,
+              "slack_median_min": 6.7,
+              "extremum_median_min": 8.5,
+              "speed_median_kn": 0.18
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 453,
+              "slack_median_min": 7.9,
+              "extremum_median_min": 8.5,
+              "speed_median_kn": 0.17
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 454,
+              "extrema": 449,
+              "slack_median_min": 6.7,
+              "extremum_median_min": 8.7,
+              "speed_median_kn": 0.2
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 431,
+              "extrema": 424,
+              "slack_median_min": 8.7,
+              "extremum_median_min": 9.6,
+              "speed_median_kn": 0.18
+            }
+          ]
+        },
+        "210": {
+          "days": 210,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 45.3,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 400,
+              "extrema": 395,
+              "slack_median_min": 4.9,
+              "extremum_median_min": 8,
+              "speed_median_kn": 0.16
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 453,
+              "slack_median_min": 6,
+              "extremum_median_min": 6.9,
+              "speed_median_kn": 0.11
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 454,
+              "extrema": 449,
+              "slack_median_min": 5.8,
+              "extremum_median_min": 8.7,
+              "speed_median_kn": 0.15
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 431,
+              "extrema": 424,
+              "slack_median_min": 6,
+              "extremum_median_min": 7.4,
+              "speed_median_kn": 0.12
+            }
+          ]
+        },
+        "365": {
+          "days": 365,
+          "weeks": 65,
+          "missed": 0,
+          "invented": 0,
+          "wrong_sign_share": 0,
+          "worst_slack_min": 48.1,
+          "quarters": [
+            {
+              "quarter": 1,
+              "weeks": 15,
+              "slacks": 400,
+              "extrema": 395,
+              "slack_median_min": 4.8,
+              "extremum_median_min": 8.1,
+              "speed_median_kn": 0.16
+            },
+            {
+              "quarter": 2,
+              "weeks": 17,
+              "slacks": 452,
+              "extrema": 453,
+              "slack_median_min": 6.3,
+              "extremum_median_min": 7.1,
+              "speed_median_kn": 0.11
+            },
+            {
+              "quarter": 3,
+              "weeks": 17,
+              "slacks": 454,
+              "extrema": 449,
+              "slack_median_min": 5.7,
+              "extremum_median_min": 8.7,
+              "speed_median_kn": 0.15
+            },
+            {
+              "quarter": 4,
+              "weeks": 16,
+              "slacks": 431,
+              "extrema": 424,
+              "slack_median_min": 5.8,
+              "extremum_median_min": 7.3,
+              "speed_median_kn": 0.12
+            }
+          ]
+        }
+      }
+    }
+  }
+}
