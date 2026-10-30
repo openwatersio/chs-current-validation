@@ -76,6 +76,16 @@ interface DatabaseStation {
   current?: { derived?: unknown };
 }
 
+/** @slackwater/database through 1.0.0-beta.20261028 exports `stations`; later releases export `loadStations`. */
+type DatabaseModule =
+  | { stations: readonly DatabaseStation[] }
+  | { loadStations(): Promise<{ accepted: readonly DatabaseStation[] }> };
+
+/** The database's accepted stations. Handles both exports because the workflow installs whichever release is newest. */
+export async function acceptedStations(database: DatabaseModule) {
+  return "loadStations" in database ? (await database.loadStations()).accepted : database.stations;
+}
+
 /** The curated CHS current gates the benchmark fits: every one in the database except those whose slack derives from a tide port. */
 export function fittedGates(stations: readonly DatabaseStation[]): GateInput[] {
   return stations

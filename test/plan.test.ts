@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  acceptedStations,
   FULL_WINDOWS,
   fittedGates,
   MONTHLY_WINDOWS,
@@ -33,6 +34,25 @@ const base = {
   grid,
 };
 const ids = (n: number) => new Set(gates(n).map((g) => g.id));
+
+describe("acceptedStations", () => {
+  const station = {
+    id: "chs-a",
+    kind: "current",
+    latitude: 48,
+    longitude: -123,
+    source: { name: "Canadian Hydrographic Service" },
+  };
+
+  test("reads a database that exports stations", async () => {
+    expect(await acceptedStations({ stations: [station] })).toEqual([station]);
+  });
+
+  test("loads a database that exports loadStations", async () => {
+    const loadStations = async () => ({ accepted: [station] });
+    expect(await acceptedStations({ loadStations })).toEqual([station]);
+  });
+});
 
 describe("planTarget", () => {
   test("seeds 14 grid points ending at the newest one on or before today", () => {
