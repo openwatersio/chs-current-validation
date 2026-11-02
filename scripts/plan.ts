@@ -6,13 +6,19 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { readHistory, readState } from "../src/history.ts";
-import { fittedGates, planTarget, requestedBackfill, type Target } from "../src/plan.ts";
+import {
+  acceptedStations,
+  fittedGates,
+  planTarget,
+  requestedBackfill,
+  type Target,
+} from "../src/plan.ts";
 
 const root = process.cwd();
 const targets = JSON.parse(await readFile("targets.json", "utf8")) as Target[];
 // Installed at run time, never pinned, so the specifier is not a literal.
 const databaseModule = "@slackwater/database";
-const { stations } = await import(databaseModule);
+const stations = await acceptedStations(await import(databaseModule));
 const database = (
   JSON.parse(await readFile("node_modules/@slackwater/database/package.json", "utf8")) as {
     version: string;
